@@ -1,43 +1,23 @@
 @echo off
 chcp 65001 >nul
-title BIST Hibrit v4.2 PWA - GitHub'a Tek Tikla Yukleyici
 cd /d "%~dp0"
-
 echo ============================================================================
-echo   BIST HIBRIT ANALIZ v4.2 PWA — GITHUB PAGES VE BULUT YUKLEYICI
+echo   BIST HİBRİT ANALİZ v4.5 PWA — CANLI VERİ ÇEK VE GITHUB BULUTA YÜKLE
+echo   Canlı Adres: https://axonturk.github.io/borsa/
 echo ============================================================================
 echo.
-echo Bu arac, projeyi GitHub deponuza yukler. Boylece bilgisayariniz kapali olsa
-echo bile telefonunuzdan 7/24 acabilir ve Turkce sesli portfoy uyarisi alabilirsiniz.
-echo.
-
+echo [1/3] 42 BIST hissesi için güncel canlı Borsa İstanbul verileri çekiliyor...
 python uygulama_motoru.py --snapshot-uret
-
-if not exist ".git" (
-    git init
-    git branch -M main
-)
-
-git add .
-git commit -m "feat: BIST Hibrit v4.2 PWA - 42 Hisse Tam Evren, Ilk 5 Oneri ve Turkce Sesli Portfoy Asistani"
-
 echo.
-set /p REPO_URL="Lutfen GitHub depo adresinizi yapistirin (Orn: https://github.com/kullanici/bist-pwa.git): "
-if "%REPO_URL%"=="" (
-    echo [UYARI] Depo adresi girilmedi. Daha sonra 'git remote add origin URL' ve 'git push -u origin main' yapabilirsiniz.
-    pause
-    exit /b
-)
-
-git remote remove origin >nul 2>&1
-git remote add origin %REPO_URL%
-git push -u origin main
-
+echo [2/3] Değişiklikler Git paketine ekleniyor...
+git add index.html uygulama_motoru.py dogrulanmis_piyasa_snapshot.json senaryo_defteri_v4.json manifest.json sw.js GITHUB_YUKLE.bat
+git commit -m "Canli BIST Snapshot Guncellemesi (%DATE% %TIME%)"
+echo.
+echo [3/3] https://github.com/axonturk/borsa deposuna gönderiliyor...
+git push origin main
 echo.
 echo ============================================================================
-echo [BASARILI] Dosyalar GitHub'a yuklendi!
-echo Simdi GitHub deponuzda Settings -> Pages -> Branch: main (Save) secin.
-echo 1 dakika icinde telefonunuzdan https://KULLANICI_ADINIZ.github.io/DEPO_ADI/
-echo adresine girip 'Ana Ekrana Ekle (PWA)' ve 'Sesli Uyari' ozelligini kullanabilirsiniz!
+echo   TAMAMLANDI! Canlı PWA Uygulama Adresiniz:
+echo   https://axonturk.github.io/borsa/
 echo ============================================================================
 pause
