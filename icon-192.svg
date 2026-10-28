@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1325"/>
+      <stop offset="100%" stop-color="#0f2847"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="40" fill="url(#bg)"/>
+  <rect x="12" y="12" width="168" height="168" rx="30" fill="none" stroke="#1e3a5f" stroke-width="3"/>
+  <path d="M36 132 L72 96 L102 114 L152 54" fill="none" stroke="url(#accent)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="152" cy="54" r="9" fill="#10b981"/>
+  <rect x="38" y="144" width="22" height="16" rx="4" fill="#38bdf8" opacity="0.85"/>
+  <rect x="70" y="136" width="22" height="24" rx="4" fill="#38bdf8" opacity="0.85"/>
+  <rect x="102" y="126" width="22" height="34" rx="4" fill="#10b981" opacity="0.9"/>
+  <rect x="134" y="112" width="22" height="48" rx="4" fill="#10b981"/>
+  <text x="40" y="54" fill="#f8fafc" font-family="Segoe UI, Arial, sans-serif" font-weight="800" font-size="24">BIST v4</text>
+</svg>
