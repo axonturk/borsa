@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 _canli_referans.json
 _fiyat_senkronize.py
+
+.github/
