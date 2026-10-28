@@ -347,8 +347,8 @@ BIST_EVRENI = [
     # VALUE TRAP & VETO KAPISI TEST ADAYLARI
     {
         "kod": "BSOKE", "ad": "Batısöke Çimento (Value Trap Test)", "altSektor": "CAM_KIMYA_MADEN",
-        "katilimUyum": "SINIRDA_UYARI", "katilimKaynak": "Borç/Varlık Sınırda (%31.8)",
-        "faizliBorcVarlikOrani": 31.8, "faizliNakitVarlikOrani": 4.2, "mahzurluGelirOrani": 1.90,
+        "katilimUyum": "UYGUN_DEGIL", "katilimKaynak": "KAP 01.10.2026-30.04.2027 Döneminde XKTUM'dan Çıkarıldı (Borç > %33)",
+        "faizliBorcVarlikOrani": 34.2, "faizliNakitVarlikOrani": 4.2, "mahzurluGelirOrani": 1.90,
         "payBasiYillikMahzurluTL": 0.03, "toplamPayMilyon": 3224.3,
         "bazFiyat": 4.28, "low52": 4.19, "high52": 8.44,
         "fk": 5.20, "pddd": 0.55, "fdFavok": 9.80, "roe": 9.4, "roic": 6.2,
@@ -440,59 +440,118 @@ def compute_dynamic_sector_medians(stocks):
     return medians
 
 
+def _is_valid_ratio(val):
+    if val is None or isinstance(val, bool):
+        return False
+    try:
+        f = float(val)
+        return math.isfinite(f) and 0.0 <= f <= 100.0
+    except Exception:
+        return False
+
+
 def verify_xktum_compliance(stock):
-    """BIST XKTUM Kural Seti (Eylül 2026 - Madde 6.8.e) Denetimi (Payda: Toplam Varlıklar)."""
+    """
+    BIST XKTUM Kural Seti (Eylül 2026 - Madde 6.8.e) Denetimi (Payda: Toplam Varlıklar).
+    Resmi XKTUM Endeks Üyeliği ile Bilanço Rasyo Taraması ayrı alanlar olarak raporlanır.
+    NaN, None, Infinity veya kaynaksız veriler kesinlikle DOGRULANAMADI döner.
+    """
     debt_ratio = stock.get("faizliBorcVarlikOrani")
     cash_ratio = stock.get("faizliNakitVarlikOrani")
     impure_rev = stock.get("mahzurluGelirOrani")
-    kaynak = stock.get("katilimKaynak")
+    kaynak = str(stock.get("katilimKaynak") or "").strip()
 
-    if debt_ratio is None or cash_ratio is None or impure_rev is None or not kaynak:
+    if not (_is_valid_ratio(debt_ratio) and _is_valid_ratio(cash_ratio) and _is_valid_ratio(impure_rev)) or not kaynak:
         return {
             "durum": "DOGRULANAMADI",
             "xktumUye": False,
+            "xktumEndeksUyesi": False,
+            "oranTaramasiDurum": "BELIRSIZ",
             "endeksCikisRiski": True,
-            "aciklama": "Bilanço dipnot oranları veya resmi kaynak doğrulanamadı."
+            "aciklama": "Bilanço dipnot oranları veya resmi KAFİF/KAP kaynağı doğrulanamadı."
         }
 
-    if impure_rev >= 5.0 or debt_ratio >= 33.0 or cash_ratio >= 33.0 or stock.get("katilimUyum") == "UYGUN_DEGIL":
+    debt_f = float(debt_ratio)
+    cash_f = float(cash_ratio)
+    impure_f = float(impure_rev)
+    resmi_endeks_kaydi = ("XKTUM" in kaynak.upper() or "KATILIM" in kaynak.upper()) and (stock.get("katilimUyum") in ("UYGUN", "SINIRDA_UYARI"))
+
+    # BIST 6.8.e: Eşikleri aşmama (<= %33 borç/varlık, <= %33 nakit/varlık, <= %5 mahzurlu gelir)
+    if impure_f > 5.0 or debt_f > 33.0 or cash_f > 33.0 or stock.get("katilimUyum") == "UYGUN_DEGIL":
         reasons = []
-        if debt_ratio >= 33.0:
-            reasons.append(f"Faizli Borç/Varlık %{debt_ratio:.1f} >= %33")
-        if cash_ratio >= 33.0:
-            reasons.append(f"Faizli Nakit/Varlık %{cash_ratio:.1f} >= %33")
-        if impure_rev >= 5.0:
-            reasons.append(f"Mahzurlu Gelir %{impure_rev:.1f} >= %5")
+        if debt_f > 33.0:
+            reasons.append(f"Faizli Borç/Varlık %{debt_f:.1f} > %33")
+        if cash_f > 33.0:
+            reasons.append(f"Faizli Nakit/Varlık %{cash_f:.1f} > %33")
+        if impure_f > 5.0:
+            reasons.append(f"Mahzurlu Gelir %{impure_f:.1f} > %5")
         if not reasons:
-            reasons.append("Faaliyet alanı / ana sözleşme kısıtı")
+            reasons.append(kaynak or "Faaliyet alanı / dönem revizyonu kısıtı")
         return {
             "durum": "UYGUN_DEGIL",
             "xktumUye": False,
+            "xktumEndeksUyesi": False,
+            "oranTaramasiDurum": "ESIK_ASIMI",
             "endeksCikisRiski": False,
             "aciklama": " · ".join(reasons)
         }
 
-    near_limit = (28.0 <= debt_ratio < 33.0) or (28.0 <= cash_ratio < 33.0) or (4.0 <= impure_rev < 5.0)
-    if near_limit:
+    near_limit = (28.0 <= debt_f <= 33.0) or (28.0 <= cash_f <= 33.0) or (4.0 <= impure_f <= 5.0)
+    if near_limit or stock.get("katilimUyum") == "SINIRDA_UYARI":
         return {
             "durum": "SINIRDA_UYARI",
-            "xktumUye": True,
+            "xktumUye": resmi_endeks_kaydi,
+            "xktumEndeksUyesi": resmi_endeks_kaydi,
+            "oranTaramasiDurum": "SINIRDA",
             "endeksCikisRiski": True,
-            "aciklama": f"XKTUM Üyesi ancak oran sınırda (Borç/Varlık %{debt_ratio:.1f} / %33). Sonraki dönemde endeksten çıkma riski var."
+            "aciklama": f"Oran sınır bölgesinde (Borç/Varlık %{debt_f:.1f} <= %33). Sonraki endeks döneminde izlenmeli."
         }
 
     return {
         "durum": "UYGUN",
-        "xktumUye": True,
+        "xktumUye": resmi_endeks_kaydi,
+        "xktumEndeksUyesi": resmi_endeks_kaydi,
+        "oranTaramasiDurum": "UYGUN",
         "endeksCikisRiski": False,
-        "aciklama": f"BIST XKTUM 6.8.e uyumlu (Borç/Varlık %{debt_ratio:.1f}, Nakit/Varlık %{cash_ratio:.1f}, Gelir %{impure_rev:.2f})"
+        "aciklama": f"BIST XKTUM 6.8.e uyumlu (Borç/Varlık %{debt_f:.1f}, Nakit/Varlık %{cash_f:.1f}, Gelir %{impure_f:.2f})"
     }
+
+
+def compute_gordon_justified_pddd(roe_pct, coe_pct, g_pct=None):
+    """
+    Standart Damodaran Gordon Growth Haklı PD/DD Formülü:
+    Justified P/BV = (ROE - g) / (COE - g)
+    Geçersiz parametrelerde (g >= COE) None döner; ROE <= 0 ise taban 0.20 döner.
+    """
+    if roe_pct is None or coe_pct is None:
+        return None
+    roe_d = float(roe_pct) / 100.0
+    coe_d = float(coe_pct) / 100.0
+    if not (math.isfinite(roe_d) and math.isfinite(coe_d)):
+        return None
+    if roe_d <= 0.0:
+        return 0.20
+    cpi = MACRO_PARAMS["cpiInflation"]
+    g_d = (float(g_pct) / 100.0) if g_pct is not None else min(roe_d * 0.55, cpi * 0.6578947)
+    if g_d >= coe_d:
+        return None
+    raw_pddd = (roe_d - g_d) / (coe_d - g_d)
+    return round(min(4.50, max(0.20, raw_pddd)), 4)
+
+
+def iz_suren_stop_yukselt(eski_stop, guncel_fiyat, atr14):
+    """Stop Ratchet (Mandallı İz Süren Stop): Stop seviyesi yalnız yukarı yönlü güncellenir, asla düşmez."""
+    eski = float(eski_stop or 0.0)
+    fiyat = float(guncel_fiyat or 0.0)
+    atr = float(atr14 or (fiyat * 0.028))
+    stop_mesafe = min(fiyat * 0.095, max(fiyat * 0.035, 2.5 * atr))
+    aday_stop = round(fiyat - stop_mesafe, 2)
+    return round(max(eski, aday_stop), 2)
 
 
 def evaluate_stock_quant(raw_stock, sector_medians):
     """
-    Kurumsal Değerleme, Bilanço Değişmezleri (EPS0/BVPS0) ve 4 Sütunlu Hibrit Skor Motoru.
-    Quant-TKBB Denetçi Ajanının tüm bulgularını içerir.
+    Kurumsal Değerleme, Bilanço Değişmezleri (EPS0/BVPS0) ve 4 Sütunlu Hibrit Skor Motoru (v4.7).
     """
     s = dict(raw_stock)
     sec = s.get("altSektor", "GENEL")
@@ -518,7 +577,7 @@ def evaluate_stock_quant(raw_stock, sector_medians):
     beta = s.get("beta", 1.0)
 
     required = [price, fk, pddd, fd_favok, roe, rsi14, low52, high52, atr14]
-    if any(v is None or (isinstance(v, float) and (math.isnan(v) or math.isinf(v))) for v in required) or price <= 0:
+    if any(v is None or isinstance(v, bool) or (isinstance(v, (int, float)) and (math.isnan(float(v)) or math.isinf(float(v)))) for v in required) or float(price) <= 0:
         s["veriDurumu"] = "EKSIK_VERI"
         s["uygunlukKapisi"] = False
         s["vetoNedenleri"] = ["Zorunlu fiyat veya bilanço verisi eksik (Sahte veri atanmadı)."]
@@ -527,7 +586,7 @@ def evaluate_stock_quant(raw_stock, sector_medians):
 
     s["veriDurumu"] = "DOGRULANDI"
 
-    # Bilanço değişmezleri (Fiyat değiştiğinde F/K ve PD/DD'nin doğru ölçeklenmesi için)
+    # Bilanço değişmezleri (Fiyat değiştiğinde F/K, PD/DD ve FD/FAVÖK'ün doğru ölçeklenmesi için)
     eps0 = s.get("eps0") if s.get("eps0") is not None else (round(price / fk, 6) if fk != 0 else 0.0)
     bvps0 = s.get("bvps0") if s.get("bvps0") is not None else (round(price / pddd, 6) if pddd > 0 else 0.0)
     favok_ps0 = s.get("favokPs0") if s.get("favokPs0") is not None else (round(price / fd_favok, 6) if fd_favok > 0 else 0.0)
@@ -542,13 +601,9 @@ def evaluate_stock_quant(raw_stock, sector_medians):
     reel_coe = ((1.0 + coe) / (1.0 + cpi) - 1.0)
     kazanc_verimi = (100.0 / float(fk)) if fk > 0 else -99.0
 
-    # Gordon Büyüme Modeli Teorik Haklı PD/DD (TMS 29 Reel ROE / Reel COE uyumlu)
-    if roe_dec <= 0:
-        justified_pddd = 0.20
-    else:
-        g_nom = min(roe_dec * 0.55, cpi * 0.72)
-        denom = max(0.065, coe - g_nom)
-        justified_pddd = round(min(4.50, max(0.20, (roe_dec - g_nom * 0.45) / denom)), 2)
+    # Damodaran Gordon Büyüme Modeli Teorik Haklı PD/DD: (ROE - g) / (COE - g)
+    gordon_raw = compute_gordon_justified_pddd(roe, coe * 100.0)
+    justified_pddd = round(gordon_raw, 2) if gordon_raw is not None else 0.25
 
     veto_list = []
     if fk <= 0:
@@ -564,11 +619,11 @@ def evaluate_stock_quant(raw_stock, sector_medians):
     if piotroski is not None and piotroski < 4:
         veto_list.append(f"Düşük Bilanço Kalitesi (Piotroski {piotroski}/9)")
 
-    if fk > 0 and pddd > 0 and fd_favok > 0:
+    if fk > 0 and pddd > 0 and fd_favok > 0 and gordon_raw is not None:
         val_fk = eps0 * med["medyanFK"]
-        # FD/FAVÖK'ten Özsermaye Değerine geçişte Net Nakit / Net Borç etkisi dahil edilir
-        net_nakit_etkisi = max(-0.25, min(0.18, -float(net_borc_favok or 0.0) * 0.06))
-        val_ev = (favok_ps0 * med["medyanFDFavok"]) * (1.0 + net_nakit_etkisi)
+        # EV/FAVÖK -> Özsermaye Köprüsü: Hedef EV - Net Borç Düzeltmesi (bilanço değişmezi favok_ps0 üzerinden)
+        net_borc_ps0 = favok_ps0 * float(net_borc_favok or 0.0)
+        val_ev = max(0.01, (favok_ps0 * med["medyanFDFavok"]) - (net_borc_ps0 * 0.22))
         hedef_pddd = 0.55 * med["medyanPDDD"] + 0.45 * justified_pddd
         val_pddd = bvps0 * hedef_pddd
 
@@ -588,7 +643,7 @@ def evaluate_stock_quant(raw_stock, sector_medians):
         potansiyel_pct = -100.0
         graham_degeri = None
 
-    # 4 Sütunlu Hibrit Skor v4.1
+    # 4 Sütunlu Hibrit Skor v4.7
     p1_degerleme = 0.0
     if adil_deger_baz is not None and fk > 0:
         if potansiyel_pct > 0:
@@ -664,7 +719,7 @@ def evaluate_stock_quant(raw_stock, sector_medians):
         aylik_hedef = round(price * 0.95, 2)
         aylik_potansiyel_pct = -5.0
 
-    # Günün İlk 5 Önerisi İçin Getiri İhtimali (P_win %), Ödül/Risk (R/R) ve Beklenen Değer (EV)
+    # Günün İlk 5 Önerisi İçin Sezgisel Sinyal Gücü (%), Ödül/Risk (R/R) ve Gidiş-Dönüş Maliyet Düşülmüş Net EV
     odul_risk = round(max(0.0, aylik_potansiyel_pct) / max(1.0, stop_kayip_pct), 2)
     if not uygunluk_kapisi:
         getiri_ihtimali_pct = round(max(12.0, min(39.0, ham_skor * 0.45)), 1)
@@ -681,7 +736,11 @@ def evaluate_stock_quant(raw_stock, sector_medians):
         getiri_ihtimali_pct = round(min(92.0, max(45.0, baz_olasilik)), 1)
 
     p_win_dec = getiri_ihtimali_pct / 100.0
-    beklenen_net_deger = round(p_win_dec * max(0.0, aylik_potansiyel_pct) - (1.0 - p_win_dec) * stop_kayip_pct, 2)
+    gidis_donus_maliyet_pct = round(2.0 * (MACRO_PARAMS["commissionRate"] + MACRO_PARAMS["baseSlippageRate"]) * 100.0, 3)  # %0.405
+    beklenen_net_deger = round(
+        p_win_dec * max(0.0, aylik_potansiyel_pct) - (1.0 - p_win_dec) * stop_kayip_pct - gidis_donus_maliyet_pct,
+        2
+    )
 
     gerekce_parcalari = []
     if potansiyel_pct > 15.0:
@@ -698,11 +757,12 @@ def evaluate_stock_quant(raw_stock, sector_medians):
 
     katilim_denetim = verify_xktum_compliance(s)
 
-    # KAP / İş Yatırım (isyatirimhisse + yfinance) Bilanço Röntgeni ve Bilanço/Temettü Takvimi
-    pay_milyon = float(s.get("toplamPayMilyon") or 500.0)
-    ozsermaye_milyar = round((bvps0 * pay_milyon) / 1000.0, 2) if bvps0 > 0 else 0.0
-    yillik_net_kar_milyar = round((eps0 * pay_milyon) / 1000.0, 2) if eps0 != 0 else 0.0
-    yillik_favok_milyar = round((favok_ps0 * pay_milyon) / 1000.0, 2) if favok_ps0 > 0 else 0.0
+    # Bilanço Röntgeni ve Projeksiyon Takvimi (Şeffaf Model/Tahmin Etiketli, %15 Stopajlı ve Gerçek Tarih Farklı)
+    pay_milyon_raw = s.get("toplamPayMilyon")
+    pay_milyon = float(pay_milyon_raw) if (pay_milyon_raw is not None and float(pay_milyon_raw) > 0) else None
+    ozsermaye_milyar = round((bvps0 * pay_milyon) / 1000.0, 2) if (bvps0 > 0 and pay_milyon) else 0.0
+    yillik_net_kar_milyar = round((eps0 * pay_milyon) / 1000.0, 2) if (eps0 != 0 and pay_milyon) else 0.0
+    yillik_favok_milyar = round((favok_ps0 * pay_milyon) / 1000.0, 2) if (favok_ps0 > 0 and pay_milyon) else 0.0
     nakit_varlik_orani = float(s.get("faizliNakitVarlikOrani") or 10.0)
     cari_oran = round(max(0.75, min(2.85, 1.55 - (net_borc_favok * 0.22) + (nakit_varlik_orani * 0.015))), 2)
     roic_val = float(s.get("roic") if s.get("roic") is not None else (roe * 0.78))
@@ -712,8 +772,9 @@ def evaluate_stock_quant(raw_stock, sector_medians):
 
     bilanco_analizi = {
         "sonDonem": "2026/06 (TMS-29 Enflasyon Muhasebeli)",
-        "sonrakiDonem": "2026/09 (3. Çeyrek Bilanço Dönemi)",
-        "kaynak": "KAP TMS-29 & İş Yatırım Mali Tablo Motoru (isyatirimhisse + yfinance)",
+        "sonrakiDonem": "2026/09 (3. Çeyrek Bilanço Dönemi - Beklenen)",
+        "veriNiteligi": "MODEL_PROJEKSIYONU_TMS29" if pay_milyon else "KISMI_ORAN_TAHMINI",
+        "kaynak": "KAP 2026/06 Çarpanları & Model Rasyo Projeksiyonu (Tahmini)",
         "ozsermayeMilyarTL": ozsermaye_milyar,
         "yillikNetKarMilyarTL": yillik_net_kar_milyar,
         "yillikFavokMilyarTL": yillik_favok_milyar,
@@ -724,24 +785,38 @@ def evaluate_stock_quant(raw_stock, sector_medians):
         "piotroskiOzeti": f"Karlılık: {min(4, max(0, pio_val // 2 + 1))}/4 · Kaldıraç/Likidite: {min(3, max(0, pio_val // 3))}/3 · Verimlilik: {max(0, pio_val - (min(4, max(0, pio_val // 2 + 1)) + min(3, max(0, pio_val // 3))))}/2"
     }
 
-    # Deterministik Bilanço & Temettü Takvimi + Temettü Düzeltmeli ATR Stop Kalkanı
+    bugun_date = datetime.now(timezone.utc).astimezone().date()
     kod_str = str(s.get("kod", "BIST"))
     kod_hash = sum(ord(ch) for ch in kod_str)
-    bilanco_kalan_gun = 2 + (kod_hash % 12)  # 2 ile 13 gün arası yaklaşan 3Ç bilanço takvimi
-    bilanco_gun_str = f"2026-11-{min(28, 1 + bilanco_kalan_gun):02d}"
+    bilanco_hedef_gun = min(28, 3 + (kod_hash % 12))
+    bilanco_gun_str = s.get("sonrakiBilancoTarihi") or f"2026-11-{bilanco_hedef_gun:02d}"
+    try:
+        b_parts = [int(x) for x in bilanco_gun_str.split("-")]
+        from datetime import date as dt_date
+        bilanco_kalan_gun = max(0, (dt_date(b_parts[0], b_parts[1], b_parts[2]) - bugun_date).days)
+    except Exception:
+        bilanco_kalan_gun = 7
+
     if reel_roe > 0 and fcf_verimi > 4.0:
-        beklenen_kar_durumu = "🟢 Güçlü Reel Kar & Nakit Akışı Beklentisi"
+        beklenen_kar_durumu = "🟢 Güçlü Reel Kar & Nakit Akışı Beklentisi (Model)"
     elif fk > 0 and net_borc_favok <= 2.5:
-        beklenen_kar_durumu = "🔵 Dengeli Faaliyet Karı / Marj Takibi"
+        beklenen_kar_durumu = "🔵 Dengeli Faaliyet Karı / Marj Takibi (Model)"
     else:
-        beklenen_kar_durumu = "🟠 Finansman Gideri / Borç Baskısı Riski"
+        beklenen_kar_durumu = "🟠 Finansman Gideri / Borç Baskısı Riski (Model)"
 
     temettu_verimi_pct = float(s.get("temettuVerimi") or 0.0)
     pay_basi_brut_temettu = round(price * (temettu_verimi_pct / 100.0), 2) if temettu_verimi_pct > 0 else 0.0
-    pay_basi_net_temettu = round(pay_basi_brut_temettu * 0.90, 2)  # %10 stopaj düşülmüş net
+    # 9286 sayılı Cumhurbaşkanı Kararı uyarınca %15 kar payı stopajı:
+    pay_basi_net_temettu = round(pay_basi_brut_temettu * 0.85, 2)
     if temettu_verimi_pct > 0:
-        temettu_kalan_gun = 3 + ((kod_hash * 3) % 25)
-        temettu_tarihi = f"2026-11-{min(30, 2 + temettu_kalan_gun):02d}"
+        tem_hedef_gun = min(30, 5 + ((kod_hash * 3) % 24))
+        temettu_tarihi = s.get("temettuTarihi") or f"2026-11-{tem_hedef_gun:02d}"
+        try:
+            t_parts = [int(x) for x in temettu_tarihi.split("-")]
+            from datetime import date as dt_date
+            temettu_kalan_gun = max(0, (dt_date(t_parts[0], t_parts[1], t_parts[2]) - bugun_date).days)
+        except Exception:
+            temettu_kalan_gun = 14
     else:
         temettu_kalan_gun = None
         temettu_tarihi = "Temettü Dağıtmıyor"
@@ -750,6 +825,8 @@ def evaluate_stock_quant(raw_stock, sector_medians):
     temettu_duzeltmeli_stop = round(max(0.01, chandelier_stop - pay_basi_brut_temettu), 2)
 
     takvim_bilgisi = {
+        "takvimNiteligi": "TAHMINI_TAKVIM_PROJEKSIYONU",
+        "stopajOraniPct": 15.0,
         "sonrakiBilancoTarihi": bilanco_gun_str,
         "bilancoyaKalanGun": bilanco_kalan_gun,
         "beklenenKarDurumu": beklenen_kar_durumu,
@@ -770,9 +847,9 @@ def evaluate_stock_quant(raw_stock, sector_medians):
 
     ornek_lot = max(1, int(math.floor(2500.0 / max(0.01, price))))
     sesli_al_emri_metni = (
-        f"AL EMRİ SİNYALİ: {s.get('ad', kod_str)} hissesi yüzde {getiri_ihtimali_pct:.1f} getiri ihtimali ile "
+        f"AL EMRİ SİNYALİ: {s.get('ad', kod_str)} hissesi yüzde {getiri_ihtimali_pct:.1f} sinyal gücü ile "
         f"{price:.2f} liradan alım bölgesinde. Örneğin 2500 liralık dilim için {ornek_lot} lot AL emri verilebilir; "
-        f"iz süren stop {chandelier_stop:.2f} lira, 30 günlük hedef {aylik_hedef:.2f} lira."
+        f"iz süren stop {chandelier_stop:.2f} lira, 30 günlük senaryo hedefi {aylik_hedef:.2f} lira."
     )
 
     s.update({
@@ -800,6 +877,7 @@ def evaluate_stock_quant(raw_stock, sector_medians):
         "aylikHedefFiyat": aylik_hedef,
         "aylikBeklentiPct": aylik_potansiyel_pct,
         "getiriIhtimaliPct": getiri_ihtimali_pct,
+        "olasilikNiteligi": "SEZGISEL_SINYAL_GUCU",
         "odulRiskOrani": odul_risk,
         "beklenenNetDeger": beklenen_net_deger,
         "secilmeGerekcesi": secilme_gerekcesi,
@@ -816,14 +894,15 @@ def evaluate_stock_quant(raw_stock, sector_medians):
         "uygunlukKapisi": uygunluk_kapisi,
         "valueTrapRiski": value_trap_risk,
         "vetoNedenleri": veto_list,
-        "katilimDenetim": katilim_denetim
+        "katilimDenetim": katilim_denetim,
+        "katilimOnay": bool(katilim_denetim.get("xktumUye"))
     })
     return s
 
 
 def build_top5_daily_picks(evaluated_stocks):
     """
-    Tüm taranan BIST evreni içinden 'Getiri İhtimali (%) × Beklenen Net Değer (EV)'
+    Tüm taranan BIST evreni içinden 'Sinyal Gücü (%) × Beklenen Net Değer (EV)'
     en yüksek olan Günün İlk 5 Hissesini (hem Katılım XKTUM hem Tüm BIST için) seçer.
     """
     eligible = [s for s in evaluated_stocks if s.get("uygunlukKapisi")]
@@ -852,6 +931,24 @@ def build_top5_daily_picks(evaluated_stocks):
     }
 
 
+def winsorize_series(values, low_q=0.05, high_q=0.95):
+    """%5 - %95 Persentil Winsorization (Uç Değer Kırpma) uygular."""
+    if not values:
+        return [], 0.0, 0.0
+    s_vals = sorted(float(v) for v in values)
+    n = len(s_vals)
+    if n >= 4:
+        low_idx = max(1, min(n - 2, int(round((n - 1) * low_q))))
+        high_idx = max(low_idx, min(n - 2, int(math.floor((n - 1) * high_q))))
+    else:
+        low_idx = 0
+        high_idx = n - 1
+    low_bound = s_vals[low_idx]
+    high_bound = s_vals[high_idx]
+    clipped = [min(high_bound, max(low_bound, float(v))) for v in values]
+    return clipped, low_bound, high_bound
+
+
 def attach_z_scores(evaluated_stocks):
     valid = [s for s in evaluated_stocks if s.get("veriDurumu") == "DOGRULANDI"]
     if len(valid) < 2:
@@ -859,14 +956,16 @@ def attach_z_scores(evaluated_stocks):
             s["zSkor"] = 0.0
         return evaluated_stocks
 
-    scores = [s["hamSkor"] for s in valid]
-    mean_s = sum(scores) / len(scores)
-    var_s = sum((x - mean_s) ** 2 for x in scores) / len(scores)
+    raw_scores = [s["hamSkor"] for s in valid]
+    clipped_scores, low_b, high_b = winsorize_series(raw_scores, 0.05, 0.95)
+    mean_s = sum(clipped_scores) / len(clipped_scores)
+    var_s = sum((x - mean_s) ** 2 for x in clipped_scores) / len(clipped_scores)
     std_s = math.sqrt(var_s) if var_s > 0 else 1.0
 
     for s in evaluated_stocks:
         if s.get("veriDurumu") == "DOGRULANDI":
-            s["zSkor"] = round((s["hamSkor"] - mean_s) / std_s, 2)
+            w_val = min(high_b, max(low_b, float(s["hamSkor"])))
+            s["zSkor"] = round((w_val - mean_s) / std_s, 2)
         else:
             s["zSkor"] = -3.0
     return evaluated_stocks
@@ -885,8 +984,8 @@ def compute_pairwise_correlation(c1, c2):
 
 def compute_model_weights(candidates, weight_model):
     """
-    Quant-TKBB Denetçi Ajanı Düzeltmesi:
-    - TERS_ATR_HRP: Korelasyon cezalı Hiyerarşik Risk Paritesi w_i ~ 1 / (sigma_i * (1 + avg_rho_i))
+    Ağırlık Modelleri:
+    - TERS_ATR_HRP: Korelasyon Cezalı Ters Volatilite w_i ~ 1 / (sigma_i * (1 + avg_rho_i))
     - ESIT_RISK_ERC: Kovaryans matrisi üzerinde iteratif Eşit Risk Katkısı (Equal Risk Contribution)
     - SABIT_40_35_25: Klasik %40-%35-%25
     """
@@ -903,7 +1002,7 @@ def compute_model_weights(candidates, weight_model):
     sigmas = [max(0.8, float(c.get("atrPct", 2.5))) for c in candidates]
     corr_matrix = [[compute_pairwise_correlation(candidates[i], candidates[j]) for j in range(n)] for i in range(n)]
 
-    if weight_model == "TERS_ATR_HRP":
+    if weight_model in ("TERS_ATR_HRP", "KORELASYON_TERS_ATR"):
         raw_w = []
         for i in range(n):
             avg_rho = sum(corr_matrix[i][j] for j in range(n) if i != j) / max(1, n - 1)
@@ -930,11 +1029,14 @@ def compute_model_weights(candidates, weight_model):
 
 def allocate_smart_lots(candidates, budget_tl, target_weights, cash_buffer_pct=0.0, current_day=1):
     """
-    Akıllı Tam Lot ve Artan Nakit Optimizasyonu (Zorunlu Nakit Tamponu ve alisGunu destekli).
+    Kuruş-Tam (Zero-Overrun) Akıllı Tam Lot ve Artan Nakit Optimizasyonu.
+    Birim maliyet yuvarlama farkından kaynaklanan bütçe aşımını (%100 kuruş kontrolüyle) engeller.
     """
-    deployable_tl = budget_tl * (1.0 - max(0.0, float(cash_buffer_pct)) / 100.0)
-    if not candidates or deployable_tl <= 0:
-        return [], budget_tl
+    budget_kurus = max(0, int(round(float(budget_tl) * 100)))
+    deployable_kurus = int(math.floor(budget_kurus * (1.0 - max(0.0, float(cash_buffer_pct)) / 100.0)))
+    deployable_tl = deployable_kurus / 100.0
+    if not candidates or deployable_kurus <= 0:
+        return [], round(budget_kurus / 100.0, 2)
 
     n = len(candidates)
     w_sum = sum(target_weights[:n]) or 1.0
@@ -943,14 +1045,15 @@ def allocate_smart_lots(candidates, budget_tl, target_weights, cash_buffer_pct=0
     fee_mult = 1.0 + MACRO_PARAMS["commissionRate"] + MACRO_PARAMS["baseSlippageRate"]
 
     positions = []
-    spent = 0.0
     for i, c in enumerate(candidates):
         raw_price = float(c["bazFiyat"])
         exec_price = round(raw_price * fee_mult, 4)
         alloc_tl = deployable_tl * norm_weights[i]
-        lots = int(math.floor(alloc_tl / exec_price))
-        cost = round(lots * exec_price, 2)
-        spent += cost
+        lots = max(0, int(math.floor(alloc_tl / exec_price)))
+        while lots > 0 and int(round(lots * exec_price * 100)) > int(round(alloc_tl * 100)):
+            lots -= 1
+        cost_kurus = int(round(lots * exec_price * 100))
+        cost = round(cost_kurus / 100.0, 2)
         positions.append({
             "kod": c["kod"],
             "ad": c["ad"],
@@ -959,9 +1062,12 @@ def allocate_smart_lots(candidates, budget_tl, target_weights, cash_buffer_pct=0
             "hedefAgirlikPct": round(norm_weights[i] * (1.0 - cash_buffer_pct / 100.0) * 100.0, 2),
             "lot": lots,
             "piyasaFiyati": raw_price,
-            "maliyetFiyati": round(exec_price, 3),
+            "oncekiKapanisFiyati": raw_price,
+            "maliyetFiyati": exec_price,
             "toplamMaliyetTL": cost,
+            "lotKatmanlari": [{"lot": lots, "alisGunu": int(current_day), "birimMaliyet": exec_price}] if lots > 0 else [],
             "stopFiyati": c["chandelierStop"],
+            "temettuDuzeltmeliStop": c.get("temettuDuzeltmeliStop", c["chandelierStop"]),
             "hedefFiyati": c["aylikHedefFiyat"],
             "adilDegerBaz": c["adilDegerBaz"],
             "hibritSkor": c["hibritSkor"],
@@ -973,11 +1079,12 @@ def allocate_smart_lots(candidates, budget_tl, target_weights, cash_buffer_pct=0
             "katilimDurum": c["katilimDenetim"]["durum"]
         })
 
-    rem_deployable = round(deployable_tl - spent, 2)
+    def total_cost_kurus(lot_list):
+        return sum(int(round(lot_list[j] * positions[j]["maliyetFiyati"] * 100)) for j in range(n))
 
     def weight_error(lot_list):
         return sum(
-            (((lot_list[j] * positions[j]["maliyetFiyati"]) / deployable_tl) - norm_weights[j]) ** 2
+            (((int(round(lot_list[j] * positions[j]["maliyetFiyati"] * 100)) / 100.0) / deployable_tl) - norm_weights[j]) ** 2
             for j in range(n)
         )
 
@@ -987,58 +1094,91 @@ def allocate_smart_lots(candidates, budget_tl, target_weights, cash_buffer_pct=0
     for _ in range(200):
         best_idx = None
         best_err = cur_err
+        cur_spent_k = total_cost_kurus(current_lots)
         for j in range(n):
             ep = positions[j]["maliyetFiyati"]
-            if ep <= rem_deployable:
-                trial = list(current_lots)
-                trial[j] += 1
+            trial = list(current_lots)
+            trial[j] += 1
+            new_spent_k = total_cost_kurus(trial)
+            if new_spent_k <= deployable_kurus:
                 err = weight_error(trial)
-                new_w = (trial[j] * ep) / deployable_tl
+                new_w = ((int(round(trial[j] * ep * 100)) / 100.0) / deployable_tl)
                 if err < best_err and new_w <= (norm_weights[j] + 0.025):
                     best_err = err
                     best_idx = j
         if best_idx is None:
             break
         current_lots[best_idx] += 1
-        rem_deployable = round(rem_deployable - positions[best_idx]["maliyetFiyati"], 2)
         cur_err = best_err
 
-    total_invested = 0.0
-    for j, p in enumerate(positions):
-        p["lot"] = current_lots[j]
-        p["toplamMaliyetTL"] = round(p["lot"] * p["maliyetFiyati"], 2)
-        p["guncelDegerTL"] = round(p["lot"] * p["piyasaFiyati"], 2)
-        p["gercekAgirlikPct"] = round((p["toplamMaliyetTL"] / budget_tl) * 100.0, 2)
-        total_invested += p["toplamMaliyetTL"]
+    # Son güvenlik kilidi: Toplam kuruş maliyeti deployable_kurus'u asla aşamaz
+    while total_cost_kurus(current_lots) > deployable_kurus:
+        for idx in range(n - 1, -1, -1):
+            if current_lots[idx] > 0:
+                current_lots[idx] -= 1
+                break
 
-    rem_cash = round(budget_tl - total_invested, 2)
+    total_invested_kurus = 0
+    for j, p in enumerate(positions):
+        lots_final = current_lots[j]
+        cost_k = int(round(lots_final * p["maliyetFiyati"] * 100))
+        cost_tl = round(cost_k / 100.0, 2)
+        p["lot"] = lots_final
+        p["toplamMaliyetTL"] = cost_tl
+        p["maliyetFiyati"] = round(cost_tl / lots_final, 6) if lots_final > 0 else round(p["maliyetFiyati"], 4)
+        p["lotKatmanlari"] = [{"lot": lots_final, "alisGunu": int(current_day), "birimMaliyet": p["maliyetFiyati"]}] if lots_final > 0 else []
+        p["guncelDegerTL"] = round(lots_final * p["piyasaFiyati"], 2)
+        p["gercekAgirlikPct"] = round((cost_tl / (budget_kurus / 100.0)) * 100.0, 2) if budget_kurus > 0 else 0.0
+        total_invested_kurus += cost_k
+
+    rem_cash = round((budget_kurus - total_invested_kurus) / 100.0, 2)
     return positions, rem_cash
 
 
-def calculate_tkbb_purification(position, holding_days=1, dividend_per_share=0.0):
-    """TKBB Standart 3.6.1 & 3.6.2 Pay-Gün ve Temettü Arındırma Hesabı."""
-    lots = int(position.get("lot", 0))
-    impure_per_share = float(position.get("payBasiYillikMahzurluTL", 0.0))
-    impure_pct = float(position.get("mahzurluGelirOrani", 0.0))
-    days = max(1, int(holding_days))
-
-    if lots <= 0 or (impure_per_share <= 0.0 and dividend_per_share <= 0.0):
+def calculate_tkbb_purification(position, holding_days=1, current_sim_day=None):
+    """
+    TKBB Pay Senedi İhracı ve Alım-Satımı Standardı Madde 3.6.1:
+    Paya düşen yıllık mahzurlu kazanç × Lot × (Tutulan Gün / 365).
+    Temettü dağıtımından bağımsız olarak yıllık mahzurlu gelir üzerinden pro-rata hesaplanır (çifte sayım yapılmaz).
+    FIFO lotKatmanlari varsa her katmanın kendi tutulan günü ayrı ayrı toplanır.
+    """
+    impure_per_share = float(position.get("payBasiYillikMahzurluTL") or 0.0)
+    lots = int(position.get("lot") or 0)
+    if lots <= 0 or impure_per_share <= 0.0 or not math.isfinite(impure_per_share):
         return {
             "tkbbPayGunArindirmaTL": 0.0,
             "temettuArindirmaTL": 0.0,
             "toplamArindirmaTL": 0.0,
-            "eldeTutulanGun": days,
-            "yontem": "TKBB Madde 3.6.1 (Pay Başı Mahzurlu Gelir × Lot × Gün/365)"
+            "eldeTutulanGun": max(1, int(holding_days or 1)),
+            "yontem": "TKBB Madde 3.6.1 (Pay Başı Yıllık Mahzurlu Gelir × Lot × Gün/365 - Pro-Rata)"
         }
 
-    pay_gun_tl = round(impure_per_share * lots * (days / 365.0), 2)
-    temettu_tl = round(max(0.0, float(dividend_per_share)) * lots * (impure_pct / 100.0), 2)
+    layers = position.get("lotKatmanlari")
+    if isinstance(layers, list) and len(layers) > 0:
+        sim_day = int(current_sim_day if current_sim_day is not None else max(1, int(holding_days or 1)))
+        total_share_days = 0
+        for lyr in layers:
+            l_lot = max(0, int(lyr.get("lot", 0)))
+            if "tutmaGunu" in lyr and current_sim_day is None:
+                l_day = max(1, int(lyr["tutmaGunu"]))
+            else:
+                l_day = max(1, sim_day - int(lyr.get("alisGunu", 1)) + 1)
+            total_share_days += l_lot * l_day
+        pay_gun_tl = round(impure_per_share * (total_share_days / 365.0), 2)
+        eff_days = round(total_share_days / max(1, lots), 1)
+    else:
+        days = max(1, int(holding_days or 1))
+        total_share_days = lots * days
+        pay_gun_tl = round(impure_per_share * (total_share_days / 365.0), 2)
+        eff_days = days
+
     return {
         "tkbbPayGunArindirmaTL": pay_gun_tl,
-        "temettuArindirmaTL": temettu_tl,
-        "toplamArindirmaTL": round(pay_gun_tl + temettu_tl, 2),
-        "eldeTutulanGun": days,
-        "yontem": "TKBB Madde 3.6.1 (Pay Başı Mahzurlu Gelir × Lot × Gün/365)"
+        "temettuArindirmaTL": 0.0,
+        "toplamArindirmaTL": pay_gun_tl,
+        "toplamLotGun": total_share_days,
+        "eldeTutulanGun": eff_days,
+        "yontem": "TKBB Madde 3.6.1 (Pay Başı Yıllık Mahzurlu Gelir × Lot × Gün/365 - Pro-Rata)"
     }
 
 
@@ -1157,12 +1297,14 @@ class MarketDataEngine:
         """
         Önce yfinance, yoksa standart Python urllib.request ile doğrudan BIST (.IS)
         son 1 aylık kapanış serisini ve seans içi anlık fiyatı (regularMarketPrice) çeker.
+        Aynı günün kapanış mumunu iki kez eklemez; son mumu günceller (F08 düzeltmesi).
         """
+        sorgu_kod = "TRALT" if kod == "KOZAL" else kod
         try:
-            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{kod}.IS?range=1mo&interval=1d"
+            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sorgu_kod}.IS?range=1mo&interval=1d"
             req = urllib.request.Request(
                 url,
-                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) BISTHibritPWA/4.2"}
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) BISTHibritPWA/4.7"}
             )
             with urllib.request.urlopen(req, timeout=2.5) as resp:
                 if resp.status == 200:
@@ -1171,6 +1313,7 @@ class MarketDataEngine:
                     if res_list:
                         meta = res_list[0].get("meta", {})
                         live_p = meta.get("regularMarketPrice")
+                        timestamps = res_list[0].get("timestamp") or []
                         quote_list = res_list[0].get("indicators", {}).get("quote", [])
                         if quote_list and "close" in quote_list[0]:
                             closes = [
@@ -1178,7 +1321,17 @@ class MarketDataEngine:
                                 if x is not None and not math.isnan(float(x))
                             ]
                             if live_p is not None and not math.isnan(float(live_p)) and float(live_p) > 0:
-                                closes.append(float(live_p))
+                                lp_f = float(live_p)
+                                if closes:
+                                    # Son mum bugüne aitse tekrar eklemek yerine son mumu güncelle
+                                    if timestamps and (time.time() - float(timestamps[-1])) < 86400:
+                                        closes[-1] = lp_f
+                                    elif abs(closes[-1] - lp_f) < 1e-6:
+                                        closes[-1] = lp_f
+                                    else:
+                                        closes.append(lp_f)
+                                else:
+                                    closes.append(lp_f)
                             if len(closes) >= 15:
                                 return closes
         except Exception:
@@ -1186,7 +1339,7 @@ class MarketDataEngine:
 
         if YFINANCE_AVAILABLE:
             try:
-                tkr = yf.Ticker(f"{kod}.IS")
+                tkr = yf.Ticker(f"{sorgu_kod}.IS")
                 hist = tkr.history(period="1mo", interval="1d")
                 if hist is not None and not hist.empty and "Close" in hist:
                     closes = [float(x) for x in hist["Close"].dropna().tolist()]
@@ -1206,7 +1359,7 @@ class MarketDataEngine:
         def _poller_loop():
             while True:
                 try:
-                    self.get_market_payload(force_refresh=True)
+                    self.get_market_payload(force_refresh=True, write_disk=True)
                 except Exception:
                     pass
                 time.sleep(self.auto_poll_interval)
@@ -1223,7 +1376,7 @@ class MarketDataEngine:
                 self._extra_stocks.append(dict(item))
                 existing.add(item["kod"])
                 added += 1
-        return self.get_market_payload(force_refresh=False), added
+        return self.get_market_payload(force_refresh=False, write_disk=False), added
 
     def auto_fetch_and_add_ticker(self, kod, alt_sektor="DEMIR_CELIK"):
         """
@@ -1236,12 +1389,12 @@ class MarketDataEngine:
 
         existing = {x["kod"] for x in BIST_EVRENI} | {x["kod"] for x in self._extra_stocks}
         if clean_kod in existing:
-            return self.get_market_payload(force_refresh=False), f"{clean_kod} zaten tarama evreninde mevcut."
+            return self.get_market_payload(force_refresh=False, write_disk=False), f"{clean_kod} zaten tarama evreninde mevcut."
 
         for item in GENIS_BIST_EK_HAVUZU:
             if item["kod"] == clean_kod:
                 self._extra_stocks.append(dict(item))
-                return self.get_market_payload(force_refresh=False), f"{clean_kod} ({item['ad']}) doğrulanmış BIST 100/XKTUM verisiyle otomatik eklendi."
+                return self.get_market_payload(force_refresh=False, write_disk=False), f"{clean_kod} ({item['ad']}) doğrulanmış BIST 100/XKTUM verisiyle otomatik eklendi."
 
         closes = self._fetch_bist_live_closes(clean_kod)
         if not closes or len(closes) < 15:
@@ -1288,7 +1441,7 @@ class MarketDataEngine:
             "faizliNakitVarlikOrani": None,
             "mahzurluGelirOrani": None,
             "payBasiYillikMahzurluTL": 0.0,
-            "toplamPayMilyon": 500.0,
+            "toplamPayMilyon": None,
             "bazFiyat": last_p,
             "low52": low_52,
             "high52": high_52,
@@ -1312,9 +1465,9 @@ class MarketDataEngine:
             "temettuVerimi": 2.0
         }
         self._extra_stocks.append(new_stock)
-        return self.get_market_payload(force_refresh=False), f"{clean_kod} canlı BIST fiyat ve çarpanlarıyla otomatik çekildi."
+        return self.get_market_payload(force_refresh=False, write_disk=False), f"{clean_kod} canlı BIST fiyat ve çarpanlarıyla otomatik çekildi."
 
-    def get_market_payload(self, force_refresh=False):
+    def get_market_payload(self, force_refresh=False, write_disk=True):
         now = time.time()
         with self._lock:
             if not force_refresh and self._cache is not None and (now - self._cache_timestamp) < self.cache_ttl:
@@ -1341,7 +1494,6 @@ class MarketDataEngine:
 
         live_updated_count = 0
         if force_refresh:
-            # 12 Paralel İş Parçacığı ile Kilit Tutulmadan Hızlı Canlı BIST Taraması
             def _fetch_one(st_item):
                 return st_item["kod"], self._fetch_bist_live_closes(st_item["kod"])
 
@@ -1381,14 +1533,16 @@ class MarketDataEngine:
                     scenarios = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
                 except Exception:
                     scenarios = build_default_scenarios(evaluated)
-                    LEDGER_PATH.write_text(json.dumps(scenarios, ensure_ascii=False, indent=2), encoding="utf-8")
+                    if write_disk:
+                        LEDGER_PATH.write_text(json.dumps(scenarios, ensure_ascii=False, indent=2), encoding="utf-8")
             else:
                 scenarios = build_default_scenarios(evaluated)
-                LEDGER_PATH.write_text(json.dumps(scenarios, ensure_ascii=False, indent=2), encoding="utf-8")
+                if write_disk:
+                    LEDGER_PATH.write_text(json.dumps(scenarios, ensure_ascii=False, indent=2), encoding="utf-8")
 
             now_str = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S")
             payload = {
-                "schemaVersion": "4.2-PWA-SESLI-GITHUB",
+                "schemaVersion": "4.7-KURUMSAL-PWA",
                 "guncellemeZamani": now_str,
                 "veriKaynagi": f"Canlı Paralel BIST Akışı ({live_updated_count}/{len(evaluated)} Hisse) + KAP 2026/06" if live_updated_count > 0 else f"Doğrulanmış KAP 2026/06 & BIST {len(evaluated)} Hisse Tam Evren",
                 "canliGuncellenenHisseSayisi": live_updated_count,
@@ -1409,19 +1563,52 @@ class MarketDataEngine:
 
             self._cache = payload
             self._cache_timestamp = time.time()
-            SNAPSHOT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+            # Canlı verili snapshot'ı force_refresh=False çağrısıyla ezmemek için koruma (F19):
+            if write_disk:
+                should_write_snap = True
+                if not force_refresh and SNAPSHOT_PATH.exists():
+                    try:
+                        existing_snap = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
+                        if int(existing_snap.get("canliGuncellenenHisseSayisi", 0)) > live_updated_count:
+                            should_write_snap = False
+                    except Exception:
+                        pass
+                if should_write_snap:
+                    SNAPSHOT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
             return payload
 
 
 ENGINE = MarketDataEngine()
 
+ALLOWED_STATIC_FILES = {
+    "index.html",
+    "manifest.json",
+    "sw.js",
+    "icon-192.svg",
+    "icon-512.svg",
+    "dogrulanmis_piyasa_snapshot.json",
+}
+
 
 class HybridPwaRequestHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
-        clean_path = urllib.parse.urlparse(path).path.lstrip("/")
-        if not clean_path:
-            clean_path = "index.html"
-        return str(BASE_DIR / clean_path)
+        raw_path = urllib.parse.unquote(urllib.parse.urlparse(path).path or "/")
+        clean_rel = raw_path.lstrip("/")
+        if not clean_rel:
+            clean_rel = "index.html"
+        base_resolved = BASE_DIR.resolve()
+        try:
+            candidate = (base_resolved / clean_rel).resolve()
+            is_inside = candidate.is_relative_to(base_resolved)
+        except Exception:
+            is_inside = False
+            candidate = base_resolved / "__forbidden__"
+
+        # Kök dizin dışına çıkış (Path Traversal) veya izin listesi dışı dosyalara (örn. .py, .git, senaryo_defteri) erişimi engelle (F20):
+        rel_name = candidate.relative_to(base_resolved).as_posix() if is_inside else "__forbidden__"
+        if not is_inside or rel_name not in ALLOWED_STATIC_FILES:
+            return str(base_resolved / "__forbidden_static_resource__")
+        return str(candidate)
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
@@ -1432,7 +1619,7 @@ class HybridPwaRequestHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/veriler":
             qs = urllib.parse.parse_qs(parsed.query)
             force = qs.get("force", ["0"])[0] == "1"
-            data = ENGINE.get_market_payload(force_refresh=force)
+            data = ENGINE.get_market_payload(force_refresh=force, write_disk=force)
             body = json.dumps(data, ensure_ascii=False).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -1463,26 +1650,38 @@ class HybridPwaRequestHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
             return
+        local_target = self.translate_path(self.path)
+        if local_target.endswith("__forbidden_static_resource__"):
+            self.send_response(403)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.end_headers()
+            self.wfile.write("403 Forbidden: Yetkisiz dosya yolu.".encode("utf-8"))
+            return
         return super().do_GET()
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == "/api/senaryo-kaydet":
             length = int(self.headers.get("Content-Length", "0"))
-            raw = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
+            if length <= 0 or length > 524288:
+                self.send_response(413 if length > 524288 else 400)
+                self.end_headers()
+                return
+            raw = self.rfile.read(length).decode("utf-8")
             try:
                 incoming = json.loads(raw)
-                if isinstance(incoming, dict) and "senaryolar" in incoming:
-                    LEDGER_PATH.write_text(
-                        json.dumps(incoming["senaryolar"], ensure_ascii=False, indent=2),
-                        encoding="utf-8"
-                    )
-                    if ENGINE._cache is not None:
-                        ENGINE._cache["senaryolar"] = incoming["senaryolar"]
-                    resp = {"ok": True, "mesaj": "Senaryo defteri kalıcı olarak kaydedildi."}
+                senaryolar = incoming.get("senaryolar") if isinstance(incoming, dict) else None
+                if isinstance(senaryolar, dict) and all(k in senaryolar for k in ("S1", "S2", "S3", "S4")):
+                    with ENGINE._lock:
+                        tmp_path = LEDGER_PATH.with_suffix(".tmp")
+                        tmp_path.write_text(json.dumps(senaryolar, ensure_ascii=False, indent=2), encoding="utf-8")
+                        tmp_path.replace(LEDGER_PATH)
+                        if ENGINE._cache is not None:
+                            ENGINE._cache["senaryolar"] = senaryolar
+                    resp = {"ok": True, "mesaj": "Senaryo defteri atomik olarak kaydedildi."}
                     code = 200
                 else:
-                    resp = {"ok": False, "hata": "Geçersiz senaryo verisi."}
+                    resp = {"ok": False, "hata": "Geçersiz senaryo şeması (S1..S4 zorunludur)."}
                     code = 400
             except Exception as exc:
                 resp = {"ok": False, "hata": str(exc)}
