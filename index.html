@@ -155,7 +155,23 @@
     th {
       font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px;
       color: var(--text-muted); background: var(--bg-card-alt); font-weight: 700;
-      position: sticky; top: 0;
+      position: sticky; top: 0; z-index: 2;
+    }
+    th.sortable-th {
+      cursor: pointer; user-select: none; transition: background 0.15s ease, color 0.15s ease;
+    }
+    th.sortable-th:hover {
+      background: var(--bg-hover); color: var(--text-main);
+    }
+    th.sortable-th.active-sort {
+      color: var(--accent); background: rgba(56, 189, 248, 0.14);
+      border-bottom: 2px solid var(--accent);
+    }
+    .sort-ind {
+      display: inline-block; margin-left: 3px; font-size: 10px; opacity: 0.65;
+    }
+    th.sortable-th.active-sort .sort-ind {
+      opacity: 1; color: var(--emerald); font-weight: 900;
     }
     tr:hover td { background: var(--bg-hover); }
     .num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -412,17 +428,17 @@
         </div>
       </div>
       <div class="table-wrap">
-        <table>
+        <table id="bilancoTakvimTabloEl">
           <thead>
             <tr>
-              <th>Hisse &amp; Grup</th>
-              <th>Son Bilanço &amp; Özsermaye / Net Kâr</th>
-              <th class="num">Cari Oran / FAVÖK Marjı</th>
-              <th class="num">Piotroski F-Skor (9 Kriter)</th>
-              <th>📅 2026/09 (3Ç) Bilanço Tarihi &amp; Beklenti</th>
-              <th>💰 Temettü Tarihi &amp; Pay Başı Net TL</th>
-              <th class="num">🛡️ Normal Stop / Temettü Düzeltmeli Stop</th>
-              <th>Canlı Emir Sinyali</th>
+              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 0, 'metin')" title="A→Z / Z→A Sırala">Hisse &amp; Grup <span class="sort-ind">⇅</span></th>
+              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 1, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">Son Bilanço &amp; Özsermaye / Net Kâr <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 2, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">Cari Oran / FAVÖK Marjı <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 3, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">Piotroski F-Skor (9 Kriter) <span class="sort-ind">⇅</span></th>
+              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 4, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">📅 2026/09 (3Ç) Bilanço Tarihi &amp; Beklenti <span class="sort-ind">⇅</span></th>
+              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 5, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">💰 Temettü Tarihi &amp; Pay Başı Net TL <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 6, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">🛡️ Normal Stop / Temettü Düzeltmeli Stop <span class="sort-ind">⇅</span></th>
+              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 7, 'metin')" title="A→Z / Z→A Sırala">Canlı Emir Sinyali <span class="sort-ind">⇅</span></th>
             </tr>
           </thead>
           <tbody id="bilancoTemettuTakvimiTablo"></tbody>
@@ -486,17 +502,17 @@
 
         <!-- Pozisyon Tablosu -->
         <div class="table-wrap">
-          <table>
+          <table id="aktifPozisyonTabloEl">
             <thead>
               <tr>
-                <th>Hisse &amp; Sektör</th>
-                <th class="num">Lot</th>
-                <th class="num">Maliyet (Kom. Dahil)</th>
-                <th class="num">Güncel Fiyat</th>
-                <th class="num">Stop ───●─── Hedef Mesafesi</th>
-                <th class="num">Ağırlık (Hedef/Gerçek)</th>
-                <th class="num">Net K/Z (TL &amp; %)</th>
-                <th class="num">TKBB 3.6.1 Arındırma</th>
+                <th class="sortable-th" onclick="genelTabloSutunSirala(this, 0, 'metin')" title="A→Z / Z→A Sırala">Hisse &amp; Sektör <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 1, 'sayi')" title="Lot Sayısına Göre Sırala">Lot <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 2, 'sayi')" title="Maliyete Göre Sırala">Maliyet (Kom. Dahil) <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 3, 'sayi')" title="Güncel Fiyata Göre Sırala">Güncel Fiyat <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 4, 'sayi')" title="Stop/Hedef Değerine Göre Sırala">Stop ───●─── Hedef Mesafesi <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 5, 'sayi')" title="Ağırlığa Göre Sırala">Ağırlık (Hedef/Gerçek) <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 6, 'sayi')" title="Kâr/Zarara Göre Sırala">Net K/Z (TL &amp; %) <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 7, 'sayi')" title="TKBB Arındırma Tutarına Göre Sırala">TKBB 3.6.1 Arındırma <span class="sort-ind">⇅</span></th>
                 <th>Hızlı Al / Sat İşlem</th>
               </tr>
             </thead>
@@ -581,23 +597,23 @@
       </div>
 
       <div class="table-wrap">
-        <table>
+        <table id="bistTarayiciTablo">
           <thead>
-            <tr>
-              <th>Kod &amp; Şirket</th>
-              <th class="uzman-sutun">Alt Sektör</th>
-              <th>XKTUM (6.8.e Varlık Paydası)</th>
-              <th class="num">Fiyat</th>
-              <th class="num">Adil Değer Bandı (Kötümser / Baz / İyimser)</th>
-              <th class="num">Potansiyel</th>
-              <th class="num uzman-sutun">F/K (Şirket/Med)</th>
-              <th class="num uzman-sutun">PD/DD (Şirket/Haklı)</th>
-              <th class="num uzman-sutun">FD/FAVÖK</th>
-              <th class="num">ROE / Reel ROE</th>
-              <th class="num uzman-sutun">Net Borç/FAVÖK</th>
-              <th class="num uzman-sutun">Wilder RSI / 52H</th>
-              <th class="num">Hibrit Skor v4.4 (Z-Skor)</th>
-              <th>Durum &amp; İşlem</th>
+            <tr id="tarayiciBaslikSatiri">
+              <th class="sortable-th" data-sort="kod" onclick="tarayiciSutunSirala('kod')" title="A→Z / Z→A Alfabetik Sırala">Kod &amp; Şirket <span class="sort-ind">⇅</span></th>
+              <th class="uzman-sutun sortable-th" data-sort="altSektor" onclick="tarayiciSutunSirala('altSektor')" title="Sektöre Göre A→Z / Z→A Sırala">Alt Sektör <span class="sort-ind">⇅</span></th>
+              <th class="sortable-th" data-sort="katilim" onclick="tarayiciSutunSirala('katilim')" title="XKTUM Katılım Durumuna Göre Sırala">XKTUM (6.8.e Varlık Paydası) <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th" data-sort="bazFiyat" onclick="tarayiciSutunSirala('bazFiyat')" title="Fiyata Göre (Büyük→Küçük / Küçük→Büyük) Sırala">Fiyat <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th" data-sort="adilDegerBaz" onclick="tarayiciSutunSirala('adilDegerBaz')" title="Adil Değere Göre Sırala">Adil Değer Bandı (Kötümser / Baz / İyimser) <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th" data-sort="adilDegerPotansiyelPct" onclick="tarayiciSutunSirala('adilDegerPotansiyelPct')" title="Adil Değer Potansiyeline Göre Sırala">Potansiyel <span class="sort-ind">⇅</span></th>
+              <th class="num uzman-sutun sortable-th" data-sort="fk" onclick="tarayiciSutunSirala('fk')" title="F/K Çarpanına Göre Sırala">F/K (Şirket/Med) <span class="sort-ind">⇅</span></th>
+              <th class="num uzman-sutun sortable-th" data-sort="pddd" onclick="tarayiciSutunSirala('pddd')" title="PD/DD Çarpanına Göre Sırala">PD/DD (Şirket/Haklı) <span class="sort-ind">⇅</span></th>
+              <th class="num uzman-sutun sortable-th" data-sort="fdFavok" onclick="tarayiciSutunSirala('fdFavok')" title="FD/FAVÖK Çarpanına Göre Sırala">FD/FAVÖK <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th" data-sort="roe" onclick="tarayiciSutunSirala('roe')" title="ROE / Reel ROE Karlılığına Göre Sırala">ROE / Reel ROE <span class="sort-ind">⇅</span></th>
+              <th class="num uzman-sutun sortable-th" data-sort="netBorcFavok" onclick="tarayiciSutunSirala('netBorcFavok')" title="Net Borç/FAVÖK Oranına Göre Sırala">Net Borç/FAVÖK <span class="sort-ind">⇅</span></th>
+              <th class="num uzman-sutun sortable-th" data-sort="rsi14" onclick="tarayiciSutunSirala('rsi14')" title="Wilder RSI Değerine Göre Sırala">Wilder RSI / 52H <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th active-sort" data-sort="hibritSkor" onclick="tarayiciSutunSirala('hibritSkor')" title="Hibrit Skora Göre Sırala">Hibrit Skor v4.4 (Z-Skor) <span class="sort-ind">▼</span></th>
+              <th class="sortable-th" data-sort="uygunlukKapisi" onclick="tarayiciSutunSirala('uygunlukKapisi')" title="Aday / Veto Durumuna Göre Sırala">Durum &amp; İşlem <span class="sort-ind">⇅</span></th>
             </tr>
           </thead>
           <tbody id="tarayiciTabloGovde"></tbody>
@@ -1512,13 +1528,13 @@
 
         if (canliHarita.XU100) {
           STATE.benchXu100Pct = canliHarita.XU100.degisimPct;
-          const elXu = document.getElementById("benchXu100Etiket");
-          if (elXu) elXu.textContent = `📊 Canlı XU100: ${sayiFormat(canliHarita.XU100.fiyat, 0)} (${canliHarita.XU100.degisimPct >= 0 ? "+" : ""}%${sayiFormat(canliHarita.XU100.degisimPct, 2)})`;
+          const elXu = document.getElementById("benchXu100");
+          if (elXu) elXu.textContent = `${sayiFormat(canliHarita.XU100.fiyat, 0)} (${canliHarita.XU100.degisimPct >= 0 ? "+" : ""}%${sayiFormat(canliHarita.XU100.degisimPct, 2)})`;
         }
         if (canliHarita.XKTUM) {
           STATE.benchXktumPct = canliHarita.XKTUM.degisimPct;
-          const elXk = document.getElementById("benchXktumEtiket");
-          if (elXk) elXk.textContent = `📈 Canlı XKTUM: ${sayiFormat(canliHarita.XKTUM.fiyat, 0)} (${canliHarita.XKTUM.degisimPct >= 0 ? "+" : ""}%${sayiFormat(canliHarita.XKTUM.degisimPct, 2)})`;
+          const elXk = document.getElementById("benchXktum");
+          if (elXk) elXk.textContent = `${sayiFormat(canliHarita.XKTUM.fiyat, 0)} (${canliHarita.XKTUM.degisimPct >= 0 ? "+" : ""}%${sayiFormat(canliHarita.XKTUM.degisimPct, 2)})`;
         }
 
         let guncellenenSayi = 0;
@@ -3062,6 +3078,69 @@
     // =========================================================================
     // ÇOK FAKTÖRLÜ BIST TARAYICI VE GÖRSEL KARNE MODALI
     // =========================================================================
+    function tarayiciSutunSirala(alan) {
+      const metinAlanlar = ["kod", "altSektor", "katilim", "uygunlukKapisi"];
+      if (STATE.tarayiciSiralaAlan === alan) {
+        STATE.tarayiciSiralaYon = STATE.tarayiciSiralaYon === "asc" ? "desc" : "asc";
+      } else {
+        STATE.tarayiciSiralaAlan = alan;
+        // Metin sütunlarında ilk tıklamada A→Z (asc), sayısal sütunlarda ilk tıklamada Büyük→Küçük (desc)
+        STATE.tarayiciSiralaYon = metinAlanlar.includes(alan) ? "asc" : "desc";
+      }
+      const baslikTr = document.getElementById("tarayiciBaslikSatiri");
+      if (baslikTr) {
+        baslikTr.querySelectorAll("th.sortable-th").forEach(th => {
+          const k = th.getAttribute("data-sort");
+          const ind = th.querySelector(".sort-ind");
+          if (k === STATE.tarayiciSiralaAlan) {
+            th.classList.add("active-sort");
+            const metinMi = metinAlanlar.includes(k);
+            if (ind) ind.textContent = STATE.tarayiciSiralaYon === "asc" ? (metinMi ? "▲ A→Z" : "▲") : (metinMi ? "▼ Z→A" : "▼");
+          } else {
+            th.classList.remove("active-sort");
+            if (ind) ind.textContent = "⇅";
+          }
+        });
+      }
+      tabloyuFiltrele();
+    }
+
+    function genelTabloSutunSirala(thEl, colIdx, tip = "metin") {
+      const table = thEl.closest("table");
+      const tbody = table ? table.querySelector("tbody") : null;
+      if (!tbody) return;
+      const mevcutYon = thEl.getAttribute("data-dir") === "asc" ? "desc" : "asc";
+      table.querySelectorAll("th.sortable-th").forEach(h => {
+        h.classList.remove("active-sort");
+        h.removeAttribute("data-dir");
+        const sp = h.querySelector(".sort-ind");
+        if (sp) sp.textContent = "⇅";
+      });
+      thEl.classList.add("active-sort");
+      thEl.setAttribute("data-dir", mevcutYon);
+      const sp = thEl.querySelector(".sort-ind");
+      if (sp) sp.textContent = mevcutYon === "asc" ? (tip === "metin" ? "▲ A→Z" : "▲") : (tip === "metin" ? "▼ Z→A" : "▼");
+
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      rows.sort((rA, rB) => {
+        const cellA = (rA.children[colIdx]?.innerText || "").trim();
+        const cellB = (rB.children[colIdx]?.innerText || "").trim();
+        if (tip === "sayi") {
+          const numBul = (s) => {
+            const m = s.replace(/\./g, "").replace(",", ".").match(/[-+]?\d+(\.\d+)?/);
+            return m ? parseFloat(m[0]) : -999999;
+          };
+          const vA = numBul(cellA);
+          const vB = numBul(cellB);
+          return mevcutYon === "asc" ? (vA - vB) : (vB - vA);
+        }
+        return mevcutYon === "asc"
+          ? cellA.localeCompare(cellB, "tr")
+          : cellB.localeCompare(cellA, "tr");
+      });
+      rows.forEach(r => tbody.appendChild(r));
+    }
+
     function tabloyuFiltrele() {
       const sayacEl = document.getElementById("toplamEvrenSayac");
       if (sayacEl) sayacEl.textContent = `${STATE.hisseler.length} Hisse`;
@@ -3078,6 +3157,31 @@
         if (vetoF === "SADECE_GECENLER" && !h.uygunlukKapisi) return false;
         if (vetoF === "SADECE_VETOLULAR" && h.uygunlukKapisi) return false;
         return true;
+      });
+
+      const sAlan = STATE.tarayiciSiralaAlan || "hibritSkor";
+      const sYon = STATE.tarayiciSiralaYon || "desc";
+      const carpan = sYon === "asc" ? 1 : -1;
+
+      liste.sort((a, b) => {
+        if (sAlan === "kod") return carpan * String(a.kod || "").localeCompare(String(b.kod || ""), "tr");
+        if (sAlan === "altSektor") return carpan * String(a.altSektor || "").localeCompare(String(b.altSektor || ""), "tr");
+        if (sAlan === "katilim") {
+          const sira = { UYGUN: 1, SINIRDA_UYARI: 2, UYGUN_DEGIL: 3, DOGRULANAMADI: 4 };
+          const dA = sira[a.katilimDenetim?.durum] || 4;
+          const dB = sira[b.katilimDenetim?.durum] || 4;
+          if (dA !== dB) return carpan * (dA - dB);
+          return carpan * ((a.faizliBorcVarlikOrani ?? 99) - (b.faizliBorcVarlikOrani ?? 99));
+        }
+        if (sAlan === "uygunlukKapisi") {
+          const uA = a.uygunlukKapisi ? 1 : 2;
+          const uB = b.uygunlukKapisi ? 1 : 2;
+          if (uA !== uB) return carpan * (uA - uB);
+          return (b.hibritSkor || 0) - (a.hibritSkor || 0);
+        }
+        const valA = Number(a[sAlan] ?? -999999);
+        const valB = Number(b[sAlan] ?? -999999);
+        return carpan * (valA - valB);
       });
 
       const tbody = document.getElementById("tarayiciTabloGovde");
