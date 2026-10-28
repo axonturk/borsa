@@ -1434,18 +1434,28 @@
       if (!STATE.senaryolar || !STATE.hisseler || !STATE.hisseler.length) return;
       const fiyatMap = {};
       STATE.hisseler.forEach(h => { fiyatMap[h.kod] = h; });
+      const islemFrict = (STATE.makro.commissionRate || 0.000525) + (STATE.makro.baseSlippageRate || 0.0015);
 
       Object.values(STATE.senaryolar).forEach(sc => {
+        let pozMaliyetToplam = 0;
+        let pozGuncelToplam = 0;
         for (let i = sc.pozisyonlar.length - 1; i >= 0; i--) {
           const p = sc.pozisyonlar[i];
           const guncel = fiyatMap[p.kod];
           if (guncel) {
             p.piyasaFiyati = guncel.bazFiyat;
+            p.gunlukDegisimPct = guncel.gunlukDegisimPct ?? 0;
             p.hibritSkor = guncel.hibritSkor;
             p.adilDegerBaz = guncel.adilDegerBaz;
             p.atrPct = guncel.atrPct;
+            if (STATE.simulasyonGunu === 1 && !sc.kullaniciOzelPortfoyMu && guncel.oncekiKapanis && guncel.oncekiKapanis > 0) {
+              p.maliyetFiyati = Number((guncel.oncekiKapanis * (1 + islemFrict)).toFixed(3));
+              p.toplamMaliyetTL = Number((p.lot * p.maliyetFiyati).toFixed(2));
+            }
             p.guncelDegerTL = Number((p.lot * p.piyasaFiyati).toFixed(2));
           }
+          pozMaliyetToplam += (p.toplamMaliyetTL || 0);
+          pozGuncelToplam += (p.guncelDegerTL || 0);
           if (sc.isletimModu === "OTOPILOT") {
             if (p.piyasaFiyati <= p.stopFiyati) {
               pozisyonuSatVeIkameEt(sc.senaryoId, i, "OTOPILOT_CANLI_ATR_STOP", false);
@@ -1454,13 +1464,107 @@
             }
           }
         }
+        if (STATE.simulasyonGunu === 1 && !sc.kullaniciOzelPortfoyMu && pozMaliyetToplam > 0) {
+          sc.yatirilanTutarTL = Number(pozMaliyetToplam.toFixed(2));
+          sc.nakitBakiyeTL = Number(Math.max(0, (sc.baslangicButceTL || 10000) - pozMaliyetToplam).toFixed(2));
+          sc.toplamPortfoyDegeriTL = Number((pozGuncelToplam + sc.nakitBakiyeTL).toFixed(2));
+          if (Array.isArray(sc.degerGecmisi)) {
+            if (sc.degerGecmisi.length > 25) sc.degerGecmisi.shift();
+            sc.degerGecmisi.push(sc.toplamPortfoyDegeriTL);
+          }
+        }
       });
+    }
+
+    async function tarayicidanCanliBistAkisiCek() {
+      try {
+        if (!STATE.hisseler || !STATE.hisseler.length) return false;
+        const bistAlias = { KOZAL: "TRALT" };
+        const tersAlias = { TRALT: "KOZAL" };
+        const hisseTickers = STATE.hisseler.map(h => `BIST:${bistAlias[h.kod] || h.kod}`);
+        const tumTickers = ["BIST:XU100", "BIST:XKTUM", ...hisseTickers];
+
+        const res = await fetch("https://scanner.tradingview.com/turkey/scan", {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=UTF-8" },
+          body: JSON.stringify({
+            symbols: { tickers: tumTickers },
+            columns: ["close", "change", "price_52_week_low", "price_52_week_high", "EMA20", "EMA50", "RSI", "ATR"]
+          })
+        });
+        if (!res.ok) return false;
+        const json = await res.json();
+        const rows = json && Array.isArray(json.data) ? json.data : [];
+        if (!rows.length) return false;
+
+        const canliHarita = {};
+        rows.forEach(r => {
+          const rawKod = String(r.s || "").replace("BIST:", "");
+          const kod = tersAlias[rawKod] || rawKod;
+          const d = r.d || [];
+          if (d[0] && Number(d[0]) > 0) {
+            canliHarita[kod] = {
+              fiyat: Number(Number(d[0]).toFixed(2)),
+              degisimPct: Number(Number(d[1] || 0).toFixed(2))
+            };
+          }
+        });
+
+        if (canliHarita.XU100) {
+          STATE.benchXu100Pct = canliHarita.XU100.degisimPct;
+          const elXu = document.getElementById("benchXu100Etiket");
+          if (elXu) elXu.textContent = `📊 Canlı XU100: ${sayiFormat(canliHarita.XU100.fiyat, 0)} (${canliHarita.XU100.degisimPct >= 0 ? "+" : ""}%${sayiFormat(canliHarita.XU100.degisimPct, 2)})`;
+        }
+        if (canliHarita.XKTUM) {
+          STATE.benchXktumPct = canliHarita.XKTUM.degisimPct;
+          const elXk = document.getElementById("benchXktumEtiket");
+          if (elXk) elXk.textContent = `📈 Canlı XKTUM: ${sayiFormat(canliHarita.XKTUM.fiyat, 0)} (${canliHarita.XKTUM.degisimPct >= 0 ? "+" : ""}%${sayiFormat(canliHarita.XKTUM.degisimPct, 2)})`;
+        }
+
+        let guncellenenSayi = 0;
+        const guncelHam = STATE.hisseler.map(h => {
+          const canli = canliHarita[h.kod];
+          if (!canli) return h;
+          guncellenenSayi++;
+          const eskiFiyat = Number(h.bazFiyat || canli.fiyat);
+          const yeniFiyat = canli.fiyat;
+          const oran = eskiFiyat > 0 ? (yeniFiyat / eskiFiyat) : 1.0;
+          const oncekiKapanis = Number((yeniFiyat / (1 + (canli.degisimPct / 100))).toFixed(2));
+          return {
+            ...h,
+            bazFiyat: yeniFiyat,
+            gunlukDegisimPct: canli.degisimPct,
+            oncekiKapanis,
+            low52: Number(Math.min(h.low52 * oran, yeniFiyat).toFixed(2)),
+            high52: Number(Math.max(h.high52 * oran, yeniFiyat).toFixed(2)),
+            ema20: Number((h.ema20 * oran).toFixed(2)),
+            ema50: Number((h.ema50 * oran).toFixed(2)),
+            atr14: Number(Math.max(0.02, h.atr14 * oran).toFixed(2)),
+            fk: h.eps0 ? Number((yeniFiyat / h.eps0).toFixed(2)) : h.fk,
+            pddd: h.bvps0 ? Number((yeniFiyat / h.bvps0).toFixed(2)) : h.pddd,
+            fdFavok: h.favokPs0 ? Number((yeniFiyat / h.favokPs0).toFixed(2)) : h.fdFavok
+          };
+        });
+
+        if (guncellenenSayi > 0) {
+          const { sektorMed, islenmis } = istemciEvreniHesapla(guncelHam);
+          STATE.sektorMedyanlari = sektorMed;
+          STATE.hisseler = islenmis;
+          canliFiyatlariSenaryolaraSenkronizeEt();
+          const saatStr = new Date().toLocaleTimeString("tr-TR");
+          document.getElementById("veriKaynagiEtiket").textContent = `🟢 Canlı Borsa İstanbul Akışı (${guncellenenSayi}/${STATE.hisseler.length} Hisse Anlık)`;
+          document.getElementById("guncellemeZamaniEtiket").textContent = `⏱️ Canlı Seans Saati: ${saatStr}`;
+          return true;
+        }
+      } catch (_) {}
+      return false;
     }
 
     async function verileriYukle(force = false, sessizOto = false) {
       // Eski statik fiyatlı (v4.1) önbelleği temizle ki canlı BIST fiyatları (Örn: THYAO 254 TL) anında yansısın
-      if (localStorage.getItem("bist_hibrit_v41_senaryolar")) {
+      if (localStorage.getItem("bist_hibrit_v41_senaryolar") || localStorage.getItem("bist_hibrit_v45_canli_senaryolar")) {
         localStorage.removeItem("bist_hibrit_v41_senaryolar");
+        localStorage.removeItem("bist_hibrit_v45_canli_senaryolar");
       }
       let yuklendi = false;
       try {
@@ -1470,7 +1574,7 @@
           STATE.makro = data.makroParametreler || STATE.makro;
           STATE.sektorMedyanlari = data.sektorMedyanlari || {};
           STATE.hisseler = data.hisseler || [];
-          const kayitli = localStorage.getItem("bist_hibrit_v45_canli_senaryolar");
+          const kayitli = localStorage.getItem("bist_hibrit_v46_canli_senaryolar");
           STATE.senaryolar = kayitli ? JSON.parse(kayitli) : (data.senaryolar || varsayilanSenaryolariInsaEt(STATE.hisseler));
           canliFiyatlariSenaryolaraSenkronizeEt();
           document.getElementById("veriKaynagiEtiket").textContent = `📡 Kaynak: ${data.veriKaynagi} (${data.onbellekDurumu})`;
@@ -1490,7 +1594,7 @@
               STATE.makro = snapData.makroParametreler || STATE.makro;
               STATE.sektorMedyanlari = snapData.sektorMedyanlari || {};
               STATE.hisseler = snapData.hisseler;
-              const kayitli = localStorage.getItem("bist_hibrit_v45_canli_senaryolar");
+              const kayitli = localStorage.getItem("bist_hibrit_v46_canli_senaryolar");
               STATE.senaryolar = kayitli ? JSON.parse(kayitli) : (snapData.senaryolar || varsayilanSenaryolariInsaEt(STATE.hisseler));
               canliFiyatlariSenaryolaraSenkronizeEt();
               document.getElementById("veriKaynagiEtiket").textContent = `☁️ GitHub Cloud Bulut Akışı (${STATE.hisseler.length} Hisse Tam Evren)`;
@@ -1506,13 +1610,14 @@
         const { sektorMed, islenmis } = istemciEvreniHesapla(birlesikEvren);
         STATE.sektorMedyanlari = sektorMed;
         STATE.hisseler = islenmis;
-        const kayitli = localStorage.getItem("bist_hibrit_v45_canli_senaryolar");
+        const kayitli = localStorage.getItem("bist_hibrit_v46_canli_senaryolar");
         STATE.senaryolar = kayitli ? JSON.parse(kayitli) : varsayilanSenaryolariInsaEt(STATE.hisseler);
         canliFiyatlariSenaryolaraSenkronizeEt();
         document.getElementById("veriKaynagiEtiket").textContent = `📡 Kaynak: Doğrulanmış Canlı BIST Tam Evren (${STATE.hisseler.length} Hisse)`;
         document.getElementById("guncellemeZamaniEtiket").textContent = `⏱️ Snapshot: Canlı BIST & KAP TMS 29 Düzeltmeli`;
       }
-      STATE.canliOtoSayacSn = 30;
+      await tarayicidanCanliBistAkisiCek();
+      STATE.canliOtoSayacSn = 15;
       senaryolariKaliciKaydet();
       ekraniCiz();
       portfoySesliUyarilariniDenetle();
@@ -1529,7 +1634,7 @@
           btn.textContent = `🟢 Canlı Oto-Takip: Aktif (${STATE.canliOtoSayacSn}sn)`;
         }
         if (STATE.canliOtoSayacSn <= 0) {
-          STATE.canliOtoSayacSn = 30;
+          STATE.canliOtoSayacSn = 15;
           verileriYukle(false, true);
         }
       }, 1000);
@@ -1539,7 +1644,7 @@
       STATE.canliOtoTakipAktif = !STATE.canliOtoTakipAktif;
       const btn = document.getElementById("canliOtoTakipBtn");
       if (STATE.canliOtoTakipAktif) {
-        STATE.canliOtoSayacSn = 30;
+        STATE.canliOtoSayacSn = 15;
         if (btn) {
           btn.textContent = `🟢 Canlı Oto-Takip: Aktif (30sn)`;
           btn.className = "btn btn-emerald";
@@ -1555,7 +1660,7 @@
     }
 
     function senaryolariKaliciKaydet() {
-      localStorage.setItem("bist_hibrit_v45_canli_senaryolar", JSON.stringify(STATE.senaryolar));
+      localStorage.setItem("bist_hibrit_v46_canli_senaryolar", JSON.stringify(STATE.senaryolar));
       fetch("/api/senaryo-kaydet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1831,7 +1936,10 @@
             </div>
             <span class="badge badge-sky">${escHtml(h.altSektor)}</span>
           </div>
-          <div style="font-size:11.5px; color:var(--text-muted);">${escHtml(h.ad)} · Fiyat: <strong style="color:var(--text-main)">${tlFormat(h.bazFiyat)}</strong></div>
+          <div style="font-size:11.5px; color:var(--text-muted);">
+            ${escHtml(h.ad)} · Canlı: <strong style="color:var(--text-main)">${tlFormat(h.bazFiyat)}</strong>
+            ${h.gunlukDegisimPct !== undefined ? `<span class="badge ${h.gunlukDegisimPct >= 0 ? 'badge-emerald' : 'badge-rose'}" style="margin-left:4px;">${h.gunlukDegisimPct >= 0 ? '+' : ''}%${sayiFormat(h.gunlukDegisimPct, 2)}</span>` : ""}
+          </div>
           <div style="display:flex; justify-content:space-between; font-size:11.5px; background:rgba(255,255,255,0.03); padding:5px 7px; border-radius:6px;">
             <span class="pos">🎯 30G: +%${sayiFormat(h.aylikBeklentiPct, 1)} (${tlFormat(h.aylikHedefFiyat)})</span>
             <span class="neg">🛑 Stop: -%${sayiFormat(h.stopMesafePct, 1)}</span>
@@ -2400,7 +2508,11 @@
           </div>
           <div class="scen-bottom">
             <div class="scen-pills">
-              ${sc.pozisyonlar.map(p => `<span class="badge badge-sky">${escHtml(p.kod)} (%${sayiFormat(p.gercekAgirlikPct, 1)})</span>`).join("")}
+              ${sc.pozisyonlar.map(p => {
+                const deg = Number(p.gunlukDegisimPct || 0);
+                const degStr = deg !== 0 ? ` <span class="${deg >= 0 ? 'pos' : 'neg'}">(${deg >= 0 ? '+' : ''}%${sayiFormat(deg, 2)})</span>` : "";
+                return `<span class="badge badge-sky">${escHtml(p.kod)} ${tlFormat(p.piyasaFiyati)}${degStr}</span>`;
+              }).join("")}
             </div>
             ${miniSparklineSvg(sc.degerGecmisi, renkler[sc.senaryoId] || "#10b981")}
           </div>
@@ -2996,7 +3108,10 @@
             </td>
             <td><span class="badge badge-sky">${escHtml(h.altSektor)}</span></td>
             <td>${katRozet}</td>
-            <td class="num"><strong>${tlFormat(h.bazFiyat)}</strong></td>
+            <td class="num">
+              <strong>${tlFormat(h.bazFiyat)}</strong><br/>
+              ${h.gunlukDegisimPct !== undefined ? `<small class="${h.gunlukDegisimPct >= 0 ? 'pos' : 'neg'}">${h.gunlukDegisimPct >= 0 ? '+' : ''}%${sayiFormat(h.gunlukDegisimPct, 2)} (Bugün)</small>` : ""}
+            </td>
             <td class="num">${adilBantMetin}</td>
             <td class="num ${h.adilDegerPotansiyelPct >= 0 ? "pos" : "neg"}">
               ${h.adilDegerBaz !== null ? (h.adilDegerPotansiyelPct >= 0 ? "+" : "") + "%" + sayiFormat(h.adilDegerPotansiyelPct, 1) : "—"}
@@ -3365,7 +3480,7 @@
     function varsayilanlaraSifirla() {
       if (STATE.otoSimInterval) otoSimulasyonToggle();
       localStorage.removeItem("bist_hibrit_v41_senaryolar");
-      localStorage.removeItem("bist_hibrit_v45_canli_senaryolar");
+      localStorage.removeItem("bist_hibrit_v46_canli_senaryolar");
       STATE.simulasyonGunu = 1;
       STATE.okunanUyarilar = {};
       STATE.benchXktumPct = 3.40;

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bist-hibrit-v4.3-pwa-cache';
+const CACHE_NAME = 'bist-hibrit-v4.6-canli-pwa-cache';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -35,37 +35,16 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
 
-  const url = new URL(req.url);
-
-  // API ve GitHub Pages canlı snapshot çağrılarında Network-First, çevrimdışıysa doğrulanmış son önbellek
-  if (url.pathname.startsWith('/api/') || url.pathname.endsWith('dogrulanmis_piyasa_snapshot.json')) {
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          if (res && res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-          }
-          return res;
-        })
-        .catch(() => caches.match(req))
-    );
-    return;
-  }
-
-  // Statik PWA varlıklarında Stale-While-Revalidate
+  // Her zaman Network-First (Önce Canlı Ağ, Çevrimdışıysa Önbellek)
   event.respondWith(
-    caches.match(req).then((cached) => {
-      const networkFetch = fetch(req)
-        .then((res) => {
-          if (res && res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-          }
-          return res;
-        })
-        .catch(() => cached);
-      return cached || networkFetch;
-    })
+    fetch(req)
+      .then((res) => {
+        if (res && res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
+        }
+        return res;
+      })
+      .catch(() => caches.match(req))
   );
 });
