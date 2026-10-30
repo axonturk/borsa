@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'bist-hibrit-';
-const CACHE_NAME = 'bist-hibrit-v4.8-kurumsal-pwa-cache';
+const CACHE_NAME = 'bist-hibrit-v4.9-kurumsal-pwa-cache';
 const NETWORK_TIMEOUT_MS = 4500;
 const STATIC_ASSETS = [
   './',

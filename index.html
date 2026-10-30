@@ -469,53 +469,67 @@
       <div id="equityCurveSvgKonteyner" style="width:100%; height:135px;"></div>
     </section>
 
-    <!-- 4. ANA EKRAN: SERMAYE SINIRLI AL-SAT MASASI VE AÇIK POZİSYONLARIM (SADE TEK SÜTUN AKIŞI) -->
+    <!-- 4. ANA EKRAN: SIFIR KARMAŞA — 3 NET BLOK (1. PORTFÖY ÖZETİ, 2. ELİMDEKİ HİSSELER, 3. CANLI İŞLEM GEÇMİŞİ) -->
     <section id="sec_PORTFOY_DETAY" style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px;">
+      <!-- BLOK 1: PORTFÖY SEÇİCİ & 4 NET ÖZET KARTI + ELİMDEKİ HİSSELER TABLOSU -->
       <div class="panel">
-        <div class="section-title" style="margin-bottom:10px;">
-          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <span id="aktifSenaryoBaslik" style="font-size:15px; font-weight:800;">Portföyüm</span>
-            <span class="badge badge-emerald" id="aktifSenaryoModEtiket">OTOPİLOT</span>
-            <select id="hizliSenaryoSeciciSelect" onchange="aktifSenaryoDegistir(this.value)" style="padding:4px 8px; font-size:12px; border-radius:6px; background:var(--bg-card-alt); color:var(--text-main); border:1px solid var(--border);">
-              <option value="S1">Portföy 1: Katılım HRP</option>
-              <option value="S2">Portföy 2: Klasik %40-%35-%25</option>
-              <option value="S3">Portföy 3: Momentum ERC</option>
+        <!-- Tek Satır Hızlı Portföy Seçici Butonları ve Kumanda -->
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; padding-bottom:10px; margin-bottom:10px; border-bottom:1px solid var(--border);">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <button class="btn" id="hizliPortBtn_S1" onclick="aktifSenaryoDegistir('S1')" style="font-weight:700;">1️⃣ Katılım HRP</button>
+            <button class="btn" id="hizliPortBtn_S2" onclick="aktifSenaryoDegistir('S2')" style="font-weight:700;">2️⃣ Değer &amp; Temettü</button>
+            <button class="btn" id="hizliPortBtn_S3" onclick="aktifSenaryoDegistir('S3')" style="font-weight:700;">3️⃣ Momentum BIST</button>
+            <button class="btn" id="hizliPortBtn_S4" onclick="aktifSenaryoDegistir('S4')" style="font-weight:700;">4️⃣ Kişisel Portföyüm</button>
+            <select id="hizliSenaryoSeciciSelect" onchange="aktifSenaryoDegistir(this.value)" style="padding:5px 8px; font-size:12px; border-radius:6px; background:var(--bg-card-alt); color:var(--text-main); border:1px solid var(--border); font-weight:700;">
+              <option value="S1">Portföy 1: Katılım HRP (Otopilot)</option>
+              <option value="S2">Portföy 2: Değer &amp; Temettü (Otopilot)</option>
+              <option value="S3">Portföy 3: Momentum ERC (Tüm BIST)</option>
               <option value="S4">Portföy 4: Kişisel / Özel Portföyüm</option>
             </select>
           </div>
-          <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button class="btn" onclick="aktifSenaryoModDegistir()">
-              🔄 Otopilot ⇄ Yarı-Otomatik
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span class="badge badge-emerald" id="aktifSenaryoModEtiket">🤖 OTOPİLOT</span>
+            <button class="btn" onclick="aktifSenaryoModDegistir()" title="Otopilot ile Yarı-Otomatik mod arasında geçiş yap">
+              🔄 Mod Değiştir
             </button>
-            <button class="btn" onclick="aktifSenaryoyuYenidenDengele()">
-              ♻️ Sepeti Yeniden Dengele
+            <button class="btn" onclick="aktifSenaryoyuYenidenDengele()" title="Portföyü güncel skorlarla yeniden kur">
+              ♻️ Yeniden Dengele
             </button>
           </div>
         </div>
 
-        <!-- SERMAYE SINIRLI GÜN İÇİ "ŞU KADAR LOT ŞUNU AL" REÇETESİ VE CANLI AL-SAT İŞLEM MASASI -->
-        <div id="sermayeliAlSatMasasiAlan" style="margin-bottom:12px;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+          <span id="aktifSenaryoBaslik" style="font-size:15px; font-weight:800; color:var(--accent);">Portföyüm</span>
+          <span style="font-size:11.5px; color:var(--text-muted);" id="simGunSayaci">Simülasyon Günü: 1</span>
+        </div>
 
-        <!-- Yarı Otomatik (Co-Pilot) Toplu & Tekil AL/SAT Uyarı Kartları -->
+        <!-- 4 NET ÖZET KARTI VE (İSTENİRSE AÇILIR) MANUEL İŞLEM ÇEKMECESİ -->
+        <div id="sermayeliAlSatMasasiAlan" style="margin-bottom:10px;"></div>
+
+        <!-- Sadece Yarı-Otomatik Modda Onay Bekleyen Sinyal Varsa Gösterilir (Otopilotta Gizlidir) -->
         <div id="copilotUyariAlani"></div>
 
         <!-- Portföy Ağırlık Çubuğu -->
         <div class="weight-bar" id="agirlikCubugu"></div>
 
-        <!-- Pozisyon Tablosu -->
+        <!-- BLOK 2: ELİMDEKİ HİSSELER (AÇIK POZİSYONLAR TABLOSU) -->
+        <div style="font-size:13px; font-weight:800; margin:8px 0 6px 0; display:flex; justify-content:space-between; align-items:center;">
+          <span>📦 Elimdeki Hisseler (Açık Pozisyonlar)</span>
+          <small style="color:var(--text-muted); font-weight:500;">Sütun başlıklarına tıklayarak sıralayabilirsiniz</small>
+        </div>
         <div class="table-wrap">
           <table id="aktifPozisyonTabloEl">
             <thead>
               <tr>
                 <th class="sortable-th" onclick="genelTabloSutunSirala(this, 0, 'metin')">Hisse &amp; Sektör <span class="sort-ind">⇅</span></th>
                 <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 1, 'sayi')">Lot <span class="sort-ind">⇅</span></th>
-                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 2, 'sayi')">Maliyet <span class="sort-ind">⇅</span></th>
-                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 3, 'sayi')">Güncel Fiyat <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 2, 'sayi')">Alış Maliyeti <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 3, 'sayi')">Canlı Fiyat <span class="sort-ind">⇅</span></th>
                 <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 4, 'sayi')">Stop ───●─── Hedef <span class="sort-ind">⇅</span></th>
                 <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 5, 'sayi')">Ağırlık <span class="sort-ind">⇅</span></th>
                 <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 6, 'sayi')">Net K/Z <span class="sort-ind">⇅</span></th>
                 <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 7, 'sayi')">Arındırma <span class="sort-ind">⇅</span></th>
-                <th>Hızlı Al / Sat</th>
+                <th>Hızlı İşlem</th>
               </tr>
             </thead>
             <tbody id="aktifSenaryoPozisyonTablo"></tbody>
@@ -523,10 +537,39 @@
         </div>
       </div>
 
-      <!-- İKİNCİL PANEL: RİSK, STRES TESTİ VE İŞLEM DEFTERİ (EKRAN KARMAŞASINI ÖNLEMEK İÇİN AÇILIR/KAPANIR KUTU) -->
+      <!-- BLOK 3: DOĞRUDAN GÖRÜNÜR CANLI İŞLEM GEÇMİŞİ TABLOSU ("NELER OLMUŞ GÖREBİLEYİM") -->
+      <div class="panel">
+        <div class="section-title" style="margin-bottom:8px;">
+          <span>📜 Canlı İşlem Geçmişi (Otopilot &amp; Manuel AL / SAT Kayıtları)</span>
+          <div style="display:flex; gap:5px; flex-wrap:wrap;">
+            <button class="btn" id="txFiltre_TUMU" onclick="islemGecmisiFiltrele('TUMU')" style="padding:3px 9px; font-size:11.5px;">Tümü</button>
+            <button class="btn" id="txFiltre_AL" onclick="islemGecmisiFiltrele('AL')" style="padding:3px 9px; font-size:11.5px;">🟢 Alımlar</button>
+            <button class="btn" id="txFiltre_SAT" onclick="islemGecmisiFiltrele('SAT')" style="padding:3px 9px; font-size:11.5px;">🔴 Satışlar</button>
+          </div>
+        </div>
+        <div class="table-wrap" style="max-height:310px; overflow-y:auto;">
+          <table id="canliIslemGecmisiTabloEl">
+            <thead>
+              <tr>
+                <th>Zaman / Gün</th>
+                <th>İşlem Türü</th>
+                <th>Hisse</th>
+                <th class="num">Lot &amp; Fiyat</th>
+                <th class="num">Toplam Tutar</th>
+                <th class="num">Gerçekleşen K/Z</th>
+                <th class="num">Kalan Nakit</th>
+                <th>İşlem Detayı</th>
+              </tr>
+            </thead>
+            <tbody id="islemGunluguKonteyner"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- İKİNCİL PANEL: RİSK VE STRES TESTİ (İSTEĞE BAĞLI AÇILIR KUTU) -->
       <details class="panel" style="padding:10px 14px;">
-        <summary style="cursor:pointer; font-weight:700; color:var(--accent); font-size:13px; display:flex; justify-content:space-between; align-items:center;">
-          <span>🛡️ Detaylı Risk, Stres Testi, TKBB Arındırma ve İşlem Geçmişini Göster / Gizle</span>
+        <summary style="cursor:pointer; font-weight:700; color:var(--text-muted); font-size:12.5px; display:flex; justify-content:space-between; align-items:center;">
+          <span>🛡️ İleri Düzey Risk, VaR/CVaR, TKBB Arındırma Özeti ve Stres Testi (Aç / Kapat)</span>
           <span class="badge badge-violet" id="efektifHisseSayisiEtiket">Efektif Hisse: --</span>
         </summary>
         <div style="display:flex; flex-direction:column; gap:14px; margin-top:12px;">
@@ -547,13 +590,6 @@
                 <tbody id="stresTestiTablo"></tbody>
               </table>
             </div>
-          </div>
-          <div>
-            <div class="section-title" style="font-size:12.5px;">
-              <span>📜 İşlem &amp; Denetim Defteri</span>
-              <span style="font-size:11px; color:var(--text-muted);" id="simGunSayaci">Simülasyon Günü: 1</span>
-            </div>
-            <div class="audit-list" id="islemGunluguKonteyner"></div>
           </div>
         </div>
       </details>
@@ -1504,16 +1540,38 @@
       };
 
       const katilimHavuz = gecenler.filter(h => h.katilimDenetim.durum === "UYGUN");
+      // S1: Katılım Muhafazakâr HRP (4 Farklı Sektör Lideri)
       const s1Cands = sektorluSec(katilimHavuz, 4);
       const s1Res = akilliLotDagit(s1Cands, 10000, modelAgirliklariniHesapla(s1Cands, "TERS_ATR_HRP"), 0);
+      const s1KodSet = new Set(s1Cands.map(x => x.kod));
 
-      const s2Cands = sektorluSec(katilimHavuz, 3);
+      // S2: Katılım Değer & Temettü Odaklı (%40-%35-%25 · Yüksek Temettü Verimi + İskonto)
+      const degerTemettuHavuz = [...katilimHavuz].sort((a, b) => {
+        const aFark = s1KodSet.has(a.kod) ? -18 : 18;
+        const bFark = s1KodSet.has(b.kod) ? -18 : 18;
+        return ((b.temettuVerimi || 0) * 10.0 + (b.adilDegerPotansiyelPct || 0) * 0.45 + bFark) -
+               ((a.temettuVerimi || 0) * 10.0 + (a.adilDegerPotansiyelPct || 0) * 0.45 + aFark);
+      });
+      const s2Cands = sektorluSec(degerTemettuHavuz, 3);
       const s2Res = akilliLotDagit(s2Cands, 10000, modelAgirliklariniHesapla(s2Cands, "SABIT_40_35_25"), 0);
 
-      const s3Cands = sektorluSec(gecenler.filter(h => h.puanMomentum >= 10), 5);
+      // S3: Momentum & Hacim Liderleri (5 Hisse · Tüm BIST)
+      const momHavuz = [...gecenler].sort((a, b) =>
+        ((b.puanMomentum || 0) * 3.0 + (b.getiriIhtimaliPct || 50)) -
+        ((a.puanMomentum || 0) * 3.0 + (a.getiriIhtimaliPct || 50))
+      );
+      const s3Cands = sektorluSec(momHavuz, 5);
       const s3Res = akilliLotDagit(s3Cands, 10000, modelAgirliklariniHesapla(s3Cands, "ESIT_RISK_ERC"), 0);
 
-      const s4Cands = sektorluSec(katilimHavuz.slice(1), 3);
+      // S4: Kişisel / Yarı-Otomatik Esnek Sepet (%10 Nakit Tamponlu · Düşük Volatilite & ROIC Odaklı Farklı Sektörler)
+      const s2KodSet = new Set(s2Cands.map(x => x.kod));
+      const esnekHavuz = [...katilimHavuz].sort((a, b) => {
+        const aFarkBonusu = s2KodSet.has(a.kod) ? -25 : 25;
+        const bFarkBonusu = s2KodSet.has(b.kod) ? -25 : 25;
+        return ((b.roic || 20) * 1.1 + (b.hibritSkor || 50) + bFarkBonusu) -
+               ((a.roic || 20) * 1.1 + (a.hibritSkor || 50) + aFarkBonusu);
+      });
+      const s4Cands = sektorluSec(esnekHavuz, 4);
       const s4Res = akilliLotDagit(s4Cands, 10000, modelAgirliklariniHesapla(s4Cands, "TERS_ATR_HRP"), 10);
 
       const simdi = new Date().toLocaleString("tr-TR");
@@ -1521,6 +1579,24 @@
         const yat = Number(res.pozisyonlar.reduce((a, b) => a + b.toplamMaliyetTL, 0).toFixed(2));
         const guncel = Number((res.pozisyonlar.reduce((a, b) => a + b.guncelDegerTL, 0) + res.nakit).toFixed(2));
         const arin = Number(res.pozisyonlar.reduce((a, b) => a + tkbbArindirmaHesapla(b, 1), 0).toFixed(2));
+        let akanNakit = 10000.0;
+        const kurulumKayitlari = res.pozisyonlar.map(p => {
+          akanNakit = Number(Math.max(0, akanNakit - p.toplamMaliyetTL).toFixed(2));
+          return {
+            zaman: simdi,
+            gun: 1,
+            tur: "KURULUM_AL",
+            islemYonu: "AL",
+            kod: p.kod,
+            ad: p.ad,
+            lot: p.lot,
+            fiyat: p.piyasaFiyati,
+            toplamTutar: p.toplamMaliyetTL,
+            karZararTL: null,
+            kalanNakitTL: akanNakit,
+            detay: `Portföy başlangıç alımı: ${p.lot} Lot ${p.kod} @ ${tlFormat(p.piyasaFiyati)} (Stop: ${tlFormat(p.stopFiyati)} · Hedef: ${tlFormat(p.hedefFiyati)})`
+          };
+        });
         return {
           senaryoId: id,
           ad,
@@ -1528,6 +1604,7 @@
           sadeceKatilim: kat,
           agirlikModeli: model,
           zorunluNakitTamponPct: tamponPct,
+          sermayeTavaniTL: 10000,
           baslangicButceTL: 10000,
           yatirilanTutarTL: yat,
           nakitBakiyeTL: res.nakit,
@@ -1539,18 +1616,171 @@
           degerGecmisi: [10000.0, guncel],
           olusturmaZamani: simdi,
           pozisyonlar: res.pozisyonlar,
-          islemGunlugu: [
-            { zaman: simdi, tur: "SENARYO_KURULUM", detay: `${ad} (${mod}) 10.000 TL bütçe ile kuruldu.` }
-          ]
+          islemGunlugu: kurulumKayitlari
         };
       };
 
-      return {
-        S1: paketle("S1", "Senaryo 1 · Katılım Muhafazakâr (Korelasyonlu HRP · 4 Hisse)", "OTOPILOT", true, "TERS_ATR_HRP", s1Res, 0),
-        S2: paketle("S2", "Senaryo 2 · Klasik Hibrit v4 (%40-%35-%25 · 3 Hisse)", "OTOPILOT", true, "SABIT_40_35_25", s2Res, 0),
-        S3: paketle("S3", "Senaryo 3 · Momentum Teyitli ERC (5 Hisse · Tüm BIST)", "YARI_OTOMATIK", false, "ESIT_RISK_ERC", s3Res, 0),
-        S4: paketle("S4", "Senaryo 4 · Co-Pilot Özel Sepet (%10 Nakit Tamponlu)", "YARI_OTOMATIK", true, "TERS_ATR_HRP", s4Res, 10)
+      const sMap = {
+        S1: paketle("S1", "Portföy 1 · Katılım Muhafazakâr HRP (4 Hisse)", "OTOPILOT", true, "TERS_ATR_HRP", s1Res, 0),
+        S2: paketle("S2", "Portföy 2 · Değer & Temettü Odaklı (%40-%35-%25 · 3 Hisse)", "OTOPILOT", true, "SABIT_40_35_25", s2Res, 0),
+        S3: paketle("S3", "Portföy 3 · Momentum Teyitli ERC (5 Hisse · Tüm BIST)", "YARI_OTOMATIK", false, "ESIT_RISK_ERC", s3Res, 0),
+        S4: paketle("S4", "Portföy 4 · Kişisel / Esnek Sepet (%10 Nakit Tamponlu)", "YARI_OTOMATIK", true, "TERS_ATR_HRP", s4Res, 10)
       };
+      Object.values(sMap).forEach(sc => {
+        if (sc.isletimModu === "OTOPILOT") {
+          otopilotBostaNakitDegerlendir(sc, "OTOPILOT_KURULUM_NAKIT_SUPURME", false);
+        }
+      });
+      return sMap;
+    }
+
+    // 🤖 OTOPİLOT BOŞTA NAKİT SÜPÜRME MOTORU (Kasada 2.504 TL gibi atıl nakit bırakmaz; otomatik lot alır ve İşlem Geçmişine yazar!)
+    function otopilotBostaNakitDegerlendir(sc, tetikNedeni = "OTOPILOT_NAKIT_ALIM", zilCal = false) {
+      if (!sc || sc.isletimModu !== "OTOPILOT" || !Array.isArray(STATE.hisseler) || !STATE.hisseler.length) return 0;
+      const islemFrict = (STATE.makro.commissionRate || 0.000525) + (STATE.makro.baseSlippageRate || 0.0015);
+      const sermayeTavani = Math.max(1000, Number(sc.sermayeTavaniTL || sc.baslangicButceTL || 10000));
+      const portfoyDeger = sc.pozisyonlar.reduce((a, p) => a + p.lot * p.piyasaFiyati, 0) + (sc.nakitBakiyeTL || 0);
+      const etkinTavan = Math.max(sermayeTavani, portfoyDeger);
+      const tamponTL = Number((portfoyDeger * ((sc.zorunluNakitTamponPct || 0) / 100)).toFixed(2));
+
+      const uygunHavuz = STATE.hisseler
+        .filter(h => h.uygunlukKapisi && (!sc.sadeceKatilim || h.katilimDenetim?.durum === "UYGUN") && Number(h.bazFiyat) > 0)
+        .sort((a, b) => ((b.getiriIhtimaliPct || 50) * 0.60 + (b.hibritSkor || 50) * 0.40) - ((a.getiriIhtimaliPct || 50) * 0.60 + (a.hibritSkor || 50) * 0.40));
+
+      if (!uygunHavuz.length) return 0;
+
+      let alinanToplamIslem = 0;
+      const hedefHisseSayisi = sc.agirlikModeli === "SABIT_40_35_25" ? 3 : (sc.agirlikModeli === "ESIT_RISK_ERC" ? 5 : 4);
+
+      for (let adim = 0; adim < 6; adim++) {
+        const bagliMaliyet = sc.pozisyonlar.reduce((a, p) => a + (p.toplamMaliyetTL || 0), 0);
+        const tavanBosluk = Math.max(0, Number((etkinTavan - bagliMaliyet).toFixed(2)));
+        const tamponSonrasiNakit = Math.max(0, Number(((sc.nakitBakiyeTL || 0) - tamponTL).toFixed(2)));
+        const kullanilabilirTL = Number(Math.min(tamponSonrasiNakit, tavanBosluk).toFixed(2));
+        const kullanilabilirKurus = Math.round(kullanilabilirTL * 100);
+        if (kullanilabilirKurus < 500) break; // 5 TL altı bozuk para
+
+        const mevcutKodlar = new Set(sc.pozisyonlar.map(p => p.kod));
+        const mevcutSektorler = new Set(sc.pozisyonlar.map(p => p.altSektor));
+
+        // 1. Öncelik: Eksik pozisyon varsa portföyde olmayan sektör/hisse
+        let secilenHisse = null;
+        if (sc.pozisyonlar.length < hedefHisseSayisi) {
+          secilenHisse = uygunHavuz.find(h =>
+            !mevcutKodlar.has(h.kod) &&
+            !mevcutSektorler.has(h.altSektor) &&
+            Math.round(h.bazFiyat * (1 + islemFrict) * 100) <= kullanilabilirKurus
+          ) || uygunHavuz.find(h =>
+            !mevcutKodlar.has(h.kod) &&
+            Math.round(h.bazFiyat * (1 + islemFrict) * 100) <= kullanilabilirKurus
+          );
+        }
+
+        // 2. Öncelik: Mevcut pozisyonlar içinde en düşük ağırlıklı ve paranın yettiği hisseye ekleme yap
+        if (!secilenHisse) {
+          const mevcutUygunlar = sc.pozisyonlar
+            .slice()
+            .sort((a, b) => (a.toplamMaliyetTL || 0) - (b.toplamMaliyetTL || 0))
+            .map(p => uygunHavuz.find(h => h.kod === p.kod))
+            .filter(h => h && Math.round(h.bazFiyat * (1 + islemFrict) * 100) <= kullanilabilirKurus);
+          if (mevcutUygunlar.length > 0) {
+            secilenHisse = mevcutUygunlar[0];
+          }
+        }
+
+        // 3. Öncelik: Mevcut pozisyonların birim fiyatı pahalıysa ve anlamlı boşta nakit (>= 450 TL) varsa, uygun hisse al
+        if (!secilenHisse && kullanilabilirTL >= 450 && sc.pozisyonlar.length < hedefHisseSayisi + 2) {
+          secilenHisse = uygunHavuz.find(h => Math.round(h.bazFiyat * (1 + islemFrict) * 100) <= kullanilabilirKurus);
+        }
+
+        if (!secilenHisse) break;
+
+        const birimMaliyet = Number((secilenHisse.bazFiyat * (1 + islemFrict)).toFixed(4));
+        // Eksik koltuk varsa orantılı böl, son koltuksa tüm kullanılabilir nakdi kullan
+        const eksikKoltuk = Math.max(1, hedefHisseSayisi - sc.pozisyonlar.length);
+        const dilimTL = (!mevcutKodlar.has(secilenHisse.kod) && eksikKoltuk > 1)
+          ? (kullanilabilirTL / eksikKoltuk)
+          : kullanilabilirTL;
+
+        let lot = Math.floor(dilimTL / birimMaliyet);
+        if (lot < 1) lot = Math.floor(kullanilabilirTL / birimMaliyet);
+        while (lot > 0 && Math.round(lot * birimMaliyet * 100) > kullanilabilirKurus) {
+          lot -= 1;
+        }
+        if (lot < 1) break;
+
+        const toplamMaliyetKurus = Math.round(lot * birimMaliyet * 100);
+        const toplamMaliyet = Number((toplamMaliyetKurus / 100.0).toFixed(2));
+        sc.nakitBakiyeTL = Number(((Math.round((sc.nakitBakiyeTL || 0) * 100) - toplamMaliyetKurus) / 100.0).toFixed(2));
+
+        const mevcutPoz = sc.pozisyonlar.find(p => p.kod === secilenHisse.kod);
+        if (mevcutPoz) {
+          if (!Array.isArray(mevcutPoz.lotKatmanlari) || !mevcutPoz.lotKatmanlari.length) {
+            mevcutPoz.lotKatmanlari = [{ lot: mevcutPoz.lot, alisGunu: mevcutPoz.alisGunu || 1, birimMaliyet: mevcutPoz.maliyetFiyati }];
+          }
+          mevcutPoz.lotKatmanlari.push({ lot, alisGunu: STATE.simulasyonGunu, birimMaliyet: Number((toplamMaliyet / lot).toFixed(4)) });
+          mevcutPoz.lot += lot;
+          mevcutPoz.toplamMaliyetTL = Number((mevcutPoz.toplamMaliyetTL + toplamMaliyet).toFixed(2));
+          mevcutPoz.maliyetFiyati = Number((mevcutPoz.toplamMaliyetTL / mevcutPoz.lot).toFixed(4));
+          mevcutPoz.piyasaFiyati = secilenHisse.bazFiyat;
+          mevcutPoz.guncelDegerTL = Number((mevcutPoz.lot * secilenHisse.bazFiyat).toFixed(2));
+        } else {
+          sc.pozisyonlar.push({
+            kod: secilenHisse.kod,
+            ad: secilenHisse.ad,
+            altSektor: secilenHisse.altSektor,
+            alisGunu: STATE.simulasyonGunu,
+            hedefAgirlikPct: Number((100 / Math.max(1, hedefHisseSayisi)).toFixed(1)),
+            lot,
+            piyasaFiyati: secilenHisse.bazFiyat,
+            maliyetFiyati: Number((toplamMaliyet / lot).toFixed(4)),
+            toplamMaliyetTL: toplamMaliyet,
+            guncelDegerTL: Number((lot * secilenHisse.bazFiyat).toFixed(2)),
+            gercekAgirlikPct: 0,
+            stopFiyati: secilenHisse.chandelierStop,
+            temettuDuzeltmeliStop: secilenHisse.temettuDuzeltmeliStop ?? secilenHisse.chandelierStop,
+            hedefFiyati: secilenHisse.aylikHedefFiyat,
+            adilDegerBaz: secilenHisse.adilDegerBaz,
+            hibritSkor: secilenHisse.hibritSkor,
+            atrPct: secilenHisse.atrPct,
+            beta: secilenHisse.beta ?? 1.0,
+            temettuVerimi: secilenHisse.temettuVerimi ?? 0,
+            payBasiYillikMahzurluTL: secilenHisse.payBasiYillikMahzurluTL ?? 0,
+            mahzurluGelirOrani: secilenHisse.mahzurluGelirOrani ?? 0,
+            katilimDurum: secilenHisse.katilimDenetim?.durum || "UYGUN",
+            lotKatmanlari: [{ lot, alisGunu: STATE.simulasyonGunu, birimMaliyet: Number((toplamMaliyet / lot).toFixed(4)) }]
+          });
+        }
+
+        if (!Array.isArray(sc.islemGunlugu)) sc.islemGunlugu = [];
+        sc.islemGunlugu.push({
+          zaman: `Gün ${STATE.simulasyonGunu} (${new Date().toLocaleTimeString("tr-TR")})`,
+          gun: STATE.simulasyonGunu,
+          tur: "OTOPILOT_AL",
+          islemYonu: "AL",
+          kod: secilenHisse.kod,
+          ad: secilenHisse.ad,
+          lot,
+          fiyat: secilenHisse.bazFiyat,
+          toplamTutar: toplamMaliyet,
+          karZararTL: null,
+          kalanNakitTL: sc.nakitBakiyeTL,
+          detay: `🤖 Otopilot boştaki nakitle otomatik ${lot} Lot ${secilenHisse.kod} @ ${tlFormat(secilenHisse.bazFiyat)} satın aldı (Toplam: ${tlFormat(toplamMaliyet)}).`
+        });
+        alinanToplamIslem++;
+      }
+
+      if (alinanToplamIslem > 0) {
+        const pozMaliyetToplam = sc.pozisyonlar.reduce((a, b) => a + (b.toplamMaliyetTL || 0), 0);
+        const pozGuncelToplam = sc.pozisyonlar.reduce((a, b) => a + Number((b.lot * b.piyasaFiyati).toFixed(2)), 0);
+        sc.yatirilanTutarTL = Number(pozMaliyetToplam.toFixed(2));
+        sc.toplamPortfoyDegeriTL = Number((pozGuncelToplam + (sc.nakitBakiyeTL || 0)).toFixed(2));
+        sc.acikKarZararTL = Number((sc.toplamPortfoyDegeriTL - (sc.baslangicButceTL || 10000)).toFixed(2));
+        if (zilCal && STATE.sesliUyariAktif) {
+          zilSesiCal("al");
+        }
+      }
+      return alinanToplamIslem;
     }
 
     // F02 & F17: Canlı fiyat senkronizasyonu ASLA geçmiş alış maliyetini ve nakit bakiyesini ezmez!
@@ -1587,6 +1817,10 @@
               pozisyonuSatVeIkameEt(sc.senaryoId, i, "OTOPILOT_CANLI_KAR_AL", false);
             }
           }
+        }
+        // Otopilot modundaysa kasada boşta duran nakdi (örn. 2.504,81 TL) otomatik olarak hisseye çevir!
+        if (sc.isletimModu === "OTOPILOT") {
+          otopilotBostaNakitDegerlendir(sc, "OTOPILOT_CANLI_NAKIT_SUPURME", true);
         }
         const pozMaliyetToplam = sc.pozisyonlar.reduce((a, b) => a + (b.toplamMaliyetTL || 0), 0);
         const pozGuncelToplam = sc.pozisyonlar.reduce((a, b) => a + Number((b.lot * b.piyasaFiyati).toFixed(2)), 0);
@@ -1706,13 +1940,48 @@
       return false;
     }
 
+    function senaryoIslemGecmisiniZenginlestir(senaryolar) {
+      if (!senaryolar || typeof senaryolar !== "object") return senaryolar;
+      Object.values(senaryolar).forEach(sc => {
+        if (!sc || !Array.isArray(sc.pozisyonlar)) return;
+        if (!Array.isArray(sc.islemGunlugu)) sc.islemGunlugu = [];
+        const hasStructuredBuy = sc.islemGunlugu.some(x => x && (x.islemYonu === "AL" || x.islemYonu === "SAT" || x.kod));
+        if (!hasStructuredBuy && sc.pozisyonlar.length > 0) {
+          let akanNakit = Number(sc.baslangicButceTL || 10000);
+          const kurulumSatirlari = sc.pozisyonlar.map(p => {
+            const tutar = Number(p.toplamMaliyetTL || (p.lot * p.maliyetFiyati)).toFixed(2);
+            akanNakit = Number(Math.max(0, akanNakit - Number(tutar)).toFixed(2));
+            return {
+              zaman: sc.olusturmaZamani || new Date().toLocaleString("tr-TR"),
+              gun: p.alisGunu || 1,
+              tur: "KURULUM_AL",
+              islemYonu: "AL",
+              kod: p.kod,
+              ad: p.ad,
+              lot: p.lot,
+              fiyat: Number((p.maliyetFiyati || p.piyasaFiyati).toFixed(2)),
+              toplamTutar: Number(tutar),
+              karZararTL: null,
+              kalanNakitTL: akanNakit,
+              detay: `Portföy başlangıç alımı: ${p.lot} Lot ${p.kod} @ ${tlFormat(p.maliyetFiyati || p.piyasaFiyati)} (Stop: ${tlFormat(p.stopFiyati)} · Hedef: ${tlFormat(p.hedefFiyati)})`
+            };
+          });
+          sc.islemGunlugu = [...kurulumSatirlari, ...sc.islemGunlugu];
+        }
+      });
+      return senaryolar;
+    }
+
     async function verileriYukle(force = false, sessizOto = false) {
-      if (localStorage.getItem("bist_hibrit_v41_senaryolar") || localStorage.getItem("bist_hibrit_v45_canli_senaryolar")) {
-        localStorage.removeItem("bist_hibrit_v41_senaryolar");
-        localStorage.removeItem("bist_hibrit_v45_canli_senaryolar");
-      }
+      ["bist_hibrit_v41_senaryolar", "bist_hibrit_v45_canli_senaryolar", "bist_hibrit_v46_canli_senaryolar"].forEach(k => {
+        if (localStorage.getItem(k)) localStorage.removeItem(k);
+      });
       const kayitliGun = Number(localStorage.getItem("bist_hibrit_v47_sim_gunu") || 0);
       if (kayitliGun >= 1) STATE.simulasyonGunu = kayitliGun;
+      const kayitliAktifId = localStorage.getItem("bist_hibrit_v49_aktif_senaryo");
+      if (kayitliAktifId && ["S1", "S2", "S3", "S4"].includes(kayitliAktifId)) {
+        STATE.aktifSenaryoId = kayitliAktifId;
+      }
 
       let yuklendi = false;
       try {
@@ -1722,8 +1991,8 @@
           STATE.makro = data.makroParametreler || STATE.makro;
           STATE.sektorMedyanlari = data.sektorMedyanlari || {};
           STATE.hisseler = data.hisseler || [];
-          const kayitli = localStorage.getItem("bist_hibrit_v46_canli_senaryolar");
-          STATE.senaryolar = kayitli ? JSON.parse(kayitli) : (data.senaryolar || varsayilanSenaryolariInsaEt(STATE.hisseler));
+          const kayitli = localStorage.getItem("bist_hibrit_v49_canli_senaryolar");
+          STATE.senaryolar = senaryoIslemGecmisiniZenginlestir(kayitli ? JSON.parse(kayitli) : varsayilanSenaryolariInsaEt(STATE.hisseler));
           canliFiyatlariSenaryolaraSenkronizeEt();
           document.getElementById("veriKaynagiEtiket").textContent = `📡 Kaynak: ${data.veriKaynagi} (${data.onbellekDurumu})`;
           document.getElementById("guncellemeZamaniEtiket").textContent = `⏱️ Güncelleme: ${data.guncellemeZamani}`;
@@ -1744,8 +2013,8 @@
               const { sektorMed, islenmis } = istemciEvreniHesapla(snapData.hisseler);
               STATE.sektorMedyanlari = sektorMed;
               STATE.hisseler = islenmis;
-              const kayitli = localStorage.getItem("bist_hibrit_v46_canli_senaryolar");
-              STATE.senaryolar = kayitli ? JSON.parse(kayitli) : (snapData.senaryolar || varsayilanSenaryolariInsaEt(STATE.hisseler));
+              const kayitli = localStorage.getItem("bist_hibrit_v49_canli_senaryolar");
+              STATE.senaryolar = senaryoIslemGecmisiniZenginlestir(kayitli ? JSON.parse(kayitli) : varsayilanSenaryolariInsaEt(STATE.hisseler));
               canliFiyatlariSenaryolaraSenkronizeEt();
               document.getElementById("veriKaynagiEtiket").textContent = `☁️ GitHub Cloud Bulut Akışı (${STATE.hisseler.length} Hisse Tam Evren)`;
               document.getElementById("guncellemeZamaniEtiket").textContent = `⏱️ Bulut Güncelleme: ${snapData.guncellemeZamani || "Güncel"}`;
@@ -1760,8 +2029,8 @@
         const { sektorMed, islenmis } = istemciEvreniHesapla(birlesikEvren);
         STATE.sektorMedyanlari = sektorMed;
         STATE.hisseler = islenmis;
-        const kayitli = localStorage.getItem("bist_hibrit_v46_canli_senaryolar");
-        STATE.senaryolar = kayitli ? JSON.parse(kayitli) : varsayilanSenaryolariInsaEt(STATE.hisseler);
+        const kayitli = localStorage.getItem("bist_hibrit_v49_canli_senaryolar");
+        STATE.senaryolar = senaryoIslemGecmisiniZenginlestir(kayitli ? JSON.parse(kayitli) : varsayilanSenaryolariInsaEt(STATE.hisseler));
         canliFiyatlariSenaryolaraSenkronizeEt();
         document.getElementById("veriKaynagiEtiket").textContent = `📡 Kaynak: Doğrulanmış Canlı BIST Tam Evren (${STATE.hisseler.length} Hisse)`;
         document.getElementById("guncellemeZamaniEtiket").textContent = `⏱️ Snapshot: Canlı BIST & KAP TMS 29 Düzeltmeli`;
@@ -1820,7 +2089,7 @@
     }
 
     function senaryolariKaliciKaydet() {
-      localStorage.setItem("bist_hibrit_v46_canli_senaryolar", JSON.stringify(STATE.senaryolar));
+      localStorage.setItem("bist_hibrit_v49_canli_senaryolar", JSON.stringify(STATE.senaryolar));
       localStorage.setItem("bist_hibrit_v47_sim_gunu", String(STATE.simulasyonGunu || 1));
       fetch("/api/senaryo-kaydet", {
         method: "POST",
@@ -2682,15 +2951,48 @@
       `;
     }
 
+    function aktifSenaryoDegistir(senaryoId) {
+      if (!senaryoId || !STATE.senaryolar || !STATE.senaryolar[senaryoId]) return;
+      STATE.aktifSenaryoId = senaryoId;
+      try { localStorage.setItem("bist_hibrit_v49_aktif_senaryo", senaryoId); } catch (_) {}
+      const sc = STATE.senaryolar[senaryoId];
+      if (sc && sc.isletimModu === "OTOPILOT") {
+        otopilotBostaNakitDegerlendir(sc, "OTOPILOT_SECIM_NAKIT_SUPURME", false);
+      }
+      senaryolariKaliciKaydet();
+      ekraniCiz();
+      toastGoster("📂 Portföy Değiştirildi", `${sc.ad} aktif edildi (${sc.pozisyonlar.length} açık pozisyon, Nakit: ${tlFormat(sc.nakitBakiyeTL)}).`, "info");
+    }
+
+    function islemGecmisiFiltrele(filtre) {
+      STATE.islemGecmisiFiltre = filtre || "TUMU";
+      aktifSenaryoDetayiniCiz();
+    }
+
     function aktifSenaryoDetayiniCiz() {
       const sc = STATE.senaryolar[STATE.aktifSenaryoId];
       if (!sc) return;
+
+      // Seçici açılır liste ve hızlı geçiş butonlarını aktif portföyle senkronize et
+      const selEl = document.getElementById("hizliSenaryoSeciciSelect");
+      if (selEl && selEl.value !== STATE.aktifSenaryoId) {
+        selEl.value = STATE.aktifSenaryoId;
+      }
+      ["S1", "S2", "S3", "S4"].forEach(sid => {
+        const b = document.getElementById(`hizliPortBtn_${sid}`);
+        if (b) {
+          const aktifMi = sid === STATE.aktifSenaryoId;
+          b.className = aktifMi ? "btn btn-primary" : "btn";
+          b.style.borderColor = aktifMi ? "var(--accent)" : "";
+        }
+      });
 
       document.getElementById("aktifSenaryoBaslik").textContent = sc.ad;
       const modEl = document.getElementById("aktifSenaryoModEtiket");
       modEl.textContent = sc.isletimModu === "OTOPILOT" ? "🤖 TAM OTOMATİK (OTOPİLOT)" : "👨‍✈️ YARI OTOMATİK (CO-PİLOT)";
       modEl.className = `badge ${sc.isletimModu === "OTOPILOT" ? "badge-emerald" : "badge-amber"}`;
-      document.getElementById("simGunSayaci").textContent = `Simülasyon Günü: ${STATE.simulasyonGunu}`;
+      const gunEl = document.getElementById("simGunSayaci");
+      if (gunEl) gunEl.textContent = `Simülasyon Günü: ${STATE.simulasyonGunu}`;
 
       const cubuk = document.getElementById("agirlikCubugu");
       cubuk.innerHTML = sc.pozisyonlar.map((p, i) => {
@@ -2700,93 +3002,42 @@
 
       sermayeliAlSatMasasiCiz(sc);
 
+      // OTOPİLOT modunda ekranı boğan tekrarlı Co-Pilot kartlarını gizle (Sadece Yarı-Otomatik modda sinyal varsa göster)
       const uyariAlani = document.getElementById("copilotUyariAlani");
-      const { satEmirleri, alEmirleri } = portfoyAlSatEmirleriniHesapla(sc);
-
-      let uyariHtml = `
-        <div class="copilot-alert" style="border-color:rgba(56,189,248,0.45); background:rgba(15,23,42,0.65); margin-bottom:10px;">
-          <div>
-            <strong>📢 Canlı AL / SAT Emir &amp; Sesli Sinyal Merkezi (${sc.isletimModu === "YARI_OTOMATIK" ? "Yarı-Otomatik & Kişisel Portföy Modu" : "Otopilot Gözlem Modu"}):</strong>
-            <span style="color:var(--text-muted); font-size:12px;">Al-sat fırsatlarını kaçırmamanız için lot, fiyat, stop ve hedef içeren sesli emir kartları:</span>
-          </div>
-          <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button class="btn btn-amber" onclick="alSatEmirleriniSesliOku()">🔊 Tüm AL/SAT Emirlerini Sesli Oku</button>
-            ${satEmirleri.filter(x => x.tip !== "STOP_YAKIN").length > 1
-              ? `<button class="btn btn-primary" onclick="tumCopilotOnerileriniUygula('${sc.senaryoId}')">✅ Tüm SAT/İkame Emirlerini Uygula (${satEmirleri.filter(x => x.tip !== "STOP_YAKIN").length})</button>`
-              : ""}
-          </div>
-        </div>
-      `;
-
-      satEmirleri.forEach(item => {
-        const { idx, p, tip, ikameAday, ikameLot, sesMetni } = item;
-        const ikameMetin = ikameAday
-          ? `<br/><span style="color:var(--emerald)">🟢 <strong>İKAME AL EMRİ:</strong> <strong>${escHtml(ikameAday.kod)}</strong> · <strong>${ikameLot} Lot</strong> @ <strong>${tlFormat(ikameAday.bazFiyat)}</strong> (Stop: ${tlFormat(ikameAday.chandelierStop)} · Hedef: ${tlFormat(ikameAday.aylikHedefFiyat)} · İhtimal: %${sayiFormat(ikameAday.getiriIhtimaliPct, 1)})</span>`
-          : "";
-        if (tip === "STOP_LOSS") {
+      if (sc.isletimModu === "OTOPILOT") {
+        uyariAlani.innerHTML = "";
+      } else {
+        const { satEmirleri, alEmirleri } = portfoyAlSatEmirleriniHesapla(sc);
+        let uyariHtml = "";
+        satEmirleri.forEach(item => {
+          const { idx, p, tip } = item;
+          if (tip === "STOP_LOSS") {
+            uyariHtml += `
+              <div class="copilot-alert">
+                <div><strong>🔴 STOP-LOSS SAT ÖNERİSİ (${escHtml(p.kod)} — ${p.lot} Lot @ ${tlFormat(p.piyasaFiyati)}):</strong> Fiyat &le; Stop (${tlFormat(p.stopFiyati)}).</div>
+                <button class="btn btn-rose" onclick="pozisyonuSatVeIkameEt('${sc.senaryoId}', ${idx}, 'STOP_LOSS')">⚡ Sat &amp; İkame Al</button>
+              </div>`;
+          } else if (tip === "KAR_AL") {
+            uyariHtml += `
+              <div class="copilot-alert" style="border-color:rgba(16,185,129,0.55);">
+                <div><strong>🎯 KÂR-AL SAT ÖNERİSİ (${escHtml(p.kod)} — ${p.lot} Lot @ ${tlFormat(p.piyasaFiyati)}):</strong> Fiyat &ge; Hedef (${tlFormat(p.hedefFiyati)}).</div>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn btn-emerald" onclick="pozisyonuSatVeIkameEt('${sc.senaryoId}', ${idx}, 'KAR_AL')">💰 Kâr-Al &amp; İkame Al</button>
+                  <button class="btn" onclick="izSurenStopYukselt('${sc.senaryoId}', ${idx})">🛡️ Stopu Yükselt</button>
+                </div>
+              </div>`;
+          }
+        });
+        alEmirleri.slice(0, 2).forEach(al => {
+          const a = al.aday;
           uyariHtml += `
-            <div class="copilot-alert">
-              <div>
-                <strong>🔴 ACİL STOP-LOSS SAT EMRİ (${escHtml(p.kod)} — ${p.lot} Lot @ ${tlFormat(p.piyasaFiyati)}):</strong>
-                Güncel Fiyat (${tlFormat(p.piyasaFiyati)}) &le; İz Süren Stop (${tlFormat(p.stopFiyati)}).${ikameMetin}
-              </div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button class="btn btn-amber" onclick="sesliKonus('${escHtml(sesMetni)}', true, 'tehlike')">🔊 Emri Sesli Oku</button>
-                <button class="btn btn-rose" onclick="pozisyonuSatVeIkameEt('${sc.senaryoId}', ${idx}, 'STOP_LOSS')">
-                  ⚡ Emri Uyguladım (Sat &amp; İkame Al)
-                </button>
-              </div>
+            <div class="copilot-alert" style="border-color:rgba(16,185,129,0.45); background:rgba(16,185,129,0.06);">
+              <div><strong>🟢 YARI-OTOMATİK AL ÖNERİSİ (${escHtml(a.kod)} — ${al.onerilenLot} Lot @ ${tlFormat(a.bazFiyat)}):</strong> Stop: ${tlFormat(a.chandelierStop)} · Hedef: ${tlFormat(a.aylikHedefFiyat)}</div>
+              <button class="btn btn-emerald" onclick="yeniAlEmriniUygula('${sc.senaryoId}', '${escHtml(a.kod)}', ${al.onerilenLot})">✅ ${al.onerilenLot} Lot AL İşle</button>
             </div>`;
-        } else if (tip === "KAR_AL") {
-          uyariHtml += `
-            <div class="copilot-alert" style="border-color:rgba(16,185,129,0.55);">
-              <div>
-                <strong>🎯 KÂR-AL SAT EMRİ (${escHtml(p.kod)} — ${p.lot} Lot @ ${tlFormat(p.piyasaFiyati)}):</strong>
-                Güncel Fiyat (${tlFormat(p.piyasaFiyati)}) &ge; 30G Hedef (${tlFormat(p.hedefFiyati)}).${ikameMetin}
-              </div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button class="btn btn-amber" onclick="sesliKonus('${escHtml(sesMetni)}', true, 'bilgi')">🔊 Emri Sesli Oku</button>
-                <button class="btn btn-emerald" onclick="pozisyonuSatVeIkameEt('${sc.senaryoId}', ${idx}, 'KAR_AL')">
-                  💰 Emri Uyguladım (Kâr-Al &amp; İkame Al)
-                </button>
-                <button class="btn" onclick="izSurenStopYukselt('${sc.senaryoId}', ${idx})">
-                  🛡️ Satma, Stopu Yükselt
-                </button>
-              </div>
-            </div>`;
-        } else {
-          uyariHtml += `
-            <div class="copilot-alert" style="border-color:rgba(245,158,11,0.55);">
-              <div>
-                <strong>⚠️ STOP YAKIN TAKİP HAZIRLIĞI (${escHtml(p.kod)} — ${p.lot} Lot):</strong>
-                Fiyat (${tlFormat(p.piyasaFiyati)}) stop seviyesine (${tlFormat(p.stopFiyati)}) %1.5'ten fazla yaklaştı.
-              </div>
-              <div style="display:flex; gap:6px;">
-                <button class="btn btn-amber" onclick="sesliKonus('${escHtml(sesMetni)}', true, 'tehlike')">🔊 Sesli Dinle</button>
-              </div>
-            </div>`;
-        }
-      });
-
-      // YENİ AL EMRİ KARTLARI (Yarı-Otomatik ve Kişisel Portföyde Alım Fırsatlarını Kaçırmamak İçin)
-      alEmirleri.forEach(al => {
-        const a = al.aday;
-        uyariHtml += `
-          <div class="copilot-alert" style="border-color:rgba(16,185,129,0.45); background:rgba(16,185,129,0.06);">
-            <div>
-              <strong>🟢 YENİ AL EMRİ FIRSATI (${escHtml(a.kod)} — ${al.onerilenLot} Lot @ ${tlFormat(a.bazFiyat)}):</strong>
-              Getiri İhtimali: <strong>%${sayiFormat(a.getiriIhtimaliPct, 1)}</strong> · 🛑 ATR Stop: <strong class="neg">${tlFormat(a.chandelierStop)}</strong> · 🎯 30G Hedef: <strong class="pos">${tlFormat(a.aylikHedefFiyat)} (+%${sayiFormat(a.aylikBeklentiPct, 1)})</strong> · <small style="color:var(--text-muted)">${escHtml(al.kaynakTuru)}</small>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <button class="btn btn-amber" onclick="sesliKonus('${escHtml(al.sesMetni)}', true, 'bilgi')">🔊 AL Emrini Sesli Oku</button>
-              <button class="btn btn-emerald" onclick="yeniAlEmriniUygula('${sc.senaryoId}', '${escHtml(a.kod)}', ${al.onerilenLot})">
-                ✅ AL Emrini Uyguladım (${al.onerilenLot} Lot Ekle)
-              </button>
-            </div>
-          </div>`;
-      });
-
-      uyariAlani.innerHTML = uyariHtml;
+        });
+        uyariAlani.innerHTML = uyariHtml;
+      }
 
       const tbody = document.getElementById("aktifSenaryoPozisyonTablo");
       tbody.innerHTML = sc.pozisyonlar.map((p, idx) => {
@@ -2826,9 +3077,9 @@
             </td>
             <td>
               <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                <button class="btn btn-emerald" style="padding:3px 7px; font-size:11px;" title="Sermaye sınırı dahilinde bu hisseden lot ekle (AL)" onclick="hizliPozisyonLotDegistir('${sc.senaryoId}', ${idx}, 'AL')">🟢 +Lot Al</button>
-                <button class="btn btn-rose" style="padding:3px 7px; font-size:11px;" title="Bu hisseden kısmi veya tam lot sat (SAT)" onclick="hizliPozisyonLotDegistir('${sc.senaryoId}', ${idx}, 'SAT')">🔴 Lot Sat</button>
-                <button class="btn" style="padding:3px 7px; font-size:11px;" onclick="pozisyonuSatVeIkameEt('${sc.senaryoId}', ${idx}, 'MANUEL_ROTASYON')">🔄 Rotasyon</button>
+                <button class="btn btn-emerald" style="padding:3px 7px; font-size:11px;" title="Sermaye sınırı dahilinde bu hisseden lot ekle (AL)" onclick="hizliPozisyonLotDegistir('${sc.senaryoId}', ${idx}, 'AL')">🟢 +Al</button>
+                <button class="btn btn-rose" style="padding:3px 7px; font-size:11px;" title="Bu hisseden kısmi veya tam lot sat (SAT)" onclick="hizliPozisyonLotDegistir('${sc.senaryoId}', ${idx}, 'SAT')">🔴 Sat</button>
+                <button class="btn" style="padding:3px 7px; font-size:11px;" onclick="pozisyonuSatVeIkameEt('${sc.senaryoId}', ${idx}, 'MANUEL_ROTASYON')">🔄 Değiştir</button>
               </div>
             </td>
           </tr>
@@ -2897,13 +3148,61 @@
         </tr>
       `;
 
+      // 📜 DOĞRUDAN GÖRÜNÜR CANLI İŞLEM GEÇMİŞİ TABLOSU ("NELER OLMUŞ GÖREBİLEYİM")
+      const aktifTxFiltre = STATE.islemGecmisiFiltre || "TUMU";
+      ["TUMU", "AL", "SAT"].forEach(fk => {
+        const fb = document.getElementById(`txFiltre_${fk}`);
+        if (fb) fb.className = fk === aktifTxFiltre ? "btn btn-primary" : "btn";
+      });
+
       const logKont = document.getElementById("islemGunluguKonteyner");
-      logKont.innerHTML = (sc.islemGunlugu || []).slice().reverse().map(l => `
-        <div class="audit-item">
-          <div><strong>[${escHtml(l.tur)}]</strong> ${escHtml(l.detay)}</div>
-          <div style="font-size:11px; color:var(--text-muted); white-space:nowrap;">${escHtml(l.zaman)}</div>
-        </div>
-      `).join("");
+      const hamKayitlar = (sc.islemGunlugu || []).slice().reverse();
+      const filtreliKayitlar = hamKayitlar.filter(l => {
+        const yon = l.islemYonu || (String(l.tur || "").includes("SAT") || String(l.tur || "").includes("STOP") || String(l.tur || "").includes("KAR") ? "SAT" : (String(l.tur || "").includes("AL") ? "AL" : "BILGI"));
+        if (aktifTxFiltre === "AL") return yon === "AL";
+        if (aktifTxFiltre === "SAT") return yon === "SAT";
+        return true;
+      });
+
+      if (!filtreliKayitlar.length) {
+        logKont.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:14px;">Bu filtrede henüz işlem kaydı bulunmuyor.</td></tr>`;
+      } else {
+        logKont.innerHTML = filtreliKayitlar.map(l => {
+          const turStr = String(l.tur || "ISLEM");
+          const yon = l.islemYonu || (turStr.includes("SAT") || turStr.includes("STOP") || turStr.includes("KAR") ? "SAT" : (turStr.includes("AL") ? "AL" : "BILGI"));
+          let rozet = `<span class="badge badge-sky">${escHtml(turStr)}</span>`;
+          if (turStr === "OTOPILOT_AL") rozet = `<span class="badge badge-emerald">🤖 OTOPİLOT AL</span>`;
+          else if (turStr === "KURULUM_AL") rozet = `<span class="badge badge-sky">🏁 KURULUM AL</span>`;
+          else if (turStr === "IKAME_AL") rozet = `<span class="badge badge-emerald">🔄 İKAME AL</span>`;
+          else if (turStr === "CANLI_AL_ISLEMI") rozet = `<span class="badge badge-emerald">🟢 MANUEL AL</span>`;
+          else if (turStr.includes("STOP")) rozet = `<span class="badge badge-rose">🛑 STOP SATIŞ</span>`;
+          else if (turStr.includes("KAR")) rozet = `<span class="badge badge-amber">🎯 KÂR-AL SATIŞ</span>`;
+          else if (turStr.includes("SAT") || turStr.includes("ROTASYON")) rozet = `<span class="badge badge-rose">🔴 SATIŞ</span>`;
+
+          const kodAd = l.kod ? `<strong>${escHtml(l.kod)}</strong>${l.ad ? `<br/><small style="color:var(--text-muted)">${escHtml(l.ad)}</small>` : ""}` : "—";
+          const lotFiyat = l.lot ? `<strong>${l.lot} Lot</strong> @ ${tlFormat(l.fiyat || 0)}` : "—";
+          const tutarStr = l.toplamTutar ? `<strong>${tlFormat(l.toplamTutar)}</strong>` : "—";
+          let kzStr = "—";
+          if (l.karZararTL !== null && l.karZararTL !== undefined && !Number.isNaN(Number(l.karZararTL))) {
+            const kz = Number(l.karZararTL);
+            kzStr = `<span class="${kz >= 0 ? "pos" : "neg"}">${kz >= 0 ? "+" : ""}${tlFormat(kz)}</span>`;
+          }
+          const kalanNakitStr = (l.kalanNakitTL !== null && l.kalanNakitTL !== undefined) ? tlFormat(l.kalanNakitTL) : "—";
+
+          return `
+            <tr>
+              <td style="white-space:nowrap; font-size:11.5px;">${escHtml(l.zaman || "—")}</td>
+              <td>${rozet}</td>
+              <td>${kodAd}</td>
+              <td class="num">${lotFiyat}</td>
+              <td class="num">${tutarStr}</td>
+              <td class="num">${kzStr}</td>
+              <td class="num">${kalanNakitStr}</td>
+              <td style="font-size:11.5px; color:var(--text-muted);">${escHtml(l.detay || "")}</td>
+            </tr>
+          `;
+        }).join("");
+      }
     }
 
     // =========================================================================
@@ -2973,6 +3272,7 @@
               pozisyonuSatVeIkameEt(sc.senaryoId, i, "OTOPILOT_HEDEF_KAR_AL", false);
             }
           }
+          otopilotBostaNakitDegerlendir(sc, "OTOPILOT_GUNLUK_NAKIT_ALIM", true);
         }
 
         const guncelToplam = Number((sc.pozisyonlar.reduce((a, b) => a + b.lot * b.piyasaFiyati, 0) + sc.nakitBakiyeTL).toFixed(2));
@@ -3042,22 +3342,42 @@
 
       const mevcutKodlar = new Set(sc.pozisyonlar.map(x => x.kod));
       const mevcutSektorler = new Set(sc.pozisyonlar.map(x => x.altSektor));
-
-      const adayHavuzu = STATE.hisseler.filter(h =>
-        h.uygunlukKapisi &&
-        !mevcutKodlar.has(h.kod) &&
-        h.kod !== satilan.kod &&
-        (!sc.sadeceKatilim || h.katilimDenetim.durum === "UYGUN") &&
-        !mevcutSektorler.has(h.altSektor)
-      );
-
-      const yeniAday = adayHavuzu[0];
       const zamanDamgasi = `Gün ${STATE.simulasyonGunu} (${new Date().toLocaleTimeString("tr-TR")})`;
 
+      // 1. Önce SATIŞ işlemini İşlem Geçmişine ayrı bir kayıt olarak düş
+      if (!Array.isArray(sc.islemGunlugu)) sc.islemGunlugu = [];
+      sc.islemGunlugu.push({
+        zaman: zamanDamgasi,
+        gun: STATE.simulasyonGunu,
+        tur: neden,
+        islemYonu: "SAT",
+        kod: satilan.kod,
+        ad: satilan.ad,
+        lot: satilan.lot,
+        fiyat: satilan.piyasaFiyati,
+        toplamTutar: netTahsilatTL,
+        karZararTL: gerceklesenKZ,
+        arindirmaTL: kapananArindirma,
+        kalanNakitTL: sc.nakitBakiyeTL,
+        detay: `🔴 ${satilan.kod} (${satilan.lot} lot, ${kapananGun}G) @ ${tlFormat(satilan.piyasaFiyati)} satıldı (Net K/Z: ${tlFormat(gerceklesenKZ)}, Arındırma: ${tlFormat(kapananArindirma)}).`
+      });
+
+      // 2. 3 Kademeli İkame Aday Seçimi (Sektör farklı -> Sektör esnetmeli -> Mevcut en güçlü hisse)
+      const temelUygunlar = STATE.hisseler.filter(h =>
+        h.uygunlukKapisi &&
+        h.kod !== satilan.kod &&
+        (!sc.sadeceKatilim || h.katilimDenetim.durum === "UYGUN")
+      );
+      const kademe1 = temelUygunlar.filter(h => !mevcutKodlar.has(h.kod) && !mevcutSektorler.has(h.altSektor));
+      const kademe2 = temelUygunlar.filter(h => !mevcutKodlar.has(h.kod));
+      const yeniAday = kademe1[0] || kademe2[0] || temelUygunlar[0];
+
       // Zorunlu nakit tamponunu ve sermaye tavanını koruyarak ikame bütçesi belirle
-      const tamponTL = (sc.toplamPortfoyDegeriTL || sc.baslangicButceTL) * ((sc.zorunluNakitTamponPct || 0) / 100);
+      const portfoyDeger = sc.pozisyonlar.reduce((a, p) => a + p.lot * p.piyasaFiyati, 0) + (sc.nakitBakiyeTL || 0);
+      const etkinTavan = Math.max(Number(sc.sermayeTavaniTL || sc.baslangicButceTL || 10000), portfoyDeger);
+      const tamponTL = portfoyDeger * ((sc.zorunluNakitTamponPct || 0) / 100);
       const bagliMaliyet = sc.pozisyonlar.reduce((a, b) => a + (b.toplamMaliyetTL || 0), 0);
-      const tavanBosluk = sc.sermayeTavaniTL ? Math.max(0, sc.sermayeTavaniTL - bagliMaliyet) : netTahsilatTL;
+      const tavanBosluk = Math.max(0, etkinTavan - bagliMaliyet);
       const kullanilabilirNakit = Math.max(0, Math.min(netTahsilatTL, sc.nakitBakiyeTL - tamponTL, tavanBosluk));
 
       if (yeniAday && kullanilabilirNakit > yeniAday.bazFiyat * 1.01) {
@@ -3070,49 +3390,73 @@
         if (yeniLot > 0) {
           const yeniMaliyet = Number((Math.round(yeniLot * mFiyat * 100) / 100).toFixed(2));
           sc.nakitBakiyeTL = Number((sc.nakitBakiyeTL - yeniMaliyet).toFixed(2));
-          sc.pozisyonlar.push({
-            kod: yeniAday.kod,
-            ad: yeniAday.ad,
-            altSektor: yeniAday.altSektor,
-            alisGunu: STATE.simulasyonGunu,
-            hedefAgirlikPct: satilan.hedefAgirlikPct,
-            lot: yeniLot,
-            piyasaFiyati: yeniAday.bazFiyat,
-            maliyetFiyati: Number((yeniMaliyet / yeniLot).toFixed(4)),
-            toplamMaliyetTL: yeniMaliyet,
-            guncelDegerTL: Number((yeniLot * yeniAday.bazFiyat).toFixed(2)),
-            gercekAgirlikPct: Number(((yeniMaliyet / Math.max(1, sc.toplamPortfoyDegeriTL)) * 100).toFixed(2)),
-            stopFiyati: yeniAday.chandelierStop,
-            temettuDuzeltmeliStop: yeniAday.temettuDuzeltmeliStop ?? yeniAday.chandelierStop,
-            hedefFiyati: yeniAday.aylikHedefFiyat,
-            adilDegerBaz: yeniAday.adilDegerBaz,
-            hibritSkor: yeniAday.hibritSkor,
-            atrPct: yeniAday.atrPct,
-            beta: yeniAday.beta ?? 1.0,
-            temettuVerimi: yeniAday.temettuVerimi ?? 0,
-            payBasiYillikMahzurluTL: yeniAday.payBasiYillikMahzurluTL ?? 0,
-            mahzurluGelirOrani: yeniAday.mahzurluGelirOrani ?? 0,
-            katilimDurum: yeniAday.katilimDenetim.durum,
-            lotKatmanlari: [{ lot: yeniLot, alisGunu: STATE.simulasyonGunu, birimMaliyet: mFiyat }]
-          });
+          const varOlan = sc.pozisyonlar.find(x => x.kod === yeniAday.kod);
+          if (varOlan) {
+            if (!Array.isArray(varOlan.lotKatmanlari) || !varOlan.lotKatmanlari.length) {
+              varOlan.lotKatmanlari = [{ lot: varOlan.lot, alisGunu: varOlan.alisGunu || 1, birimMaliyet: varOlan.maliyetFiyati }];
+            }
+            varOlan.lotKatmanlari.push({ lot: yeniLot, alisGunu: STATE.simulasyonGunu, birimMaliyet: Number((yeniMaliyet / yeniLot).toFixed(4)) });
+            varOlan.lot += yeniLot;
+            varOlan.toplamMaliyetTL = Number((varOlan.toplamMaliyetTL + yeniMaliyet).toFixed(2));
+            varOlan.maliyetFiyati = Number((varOlan.toplamMaliyetTL / varOlan.lot).toFixed(4));
+            varOlan.piyasaFiyati = yeniAday.bazFiyat;
+            varOlan.guncelDegerTL = Number((varOlan.lot * yeniAday.bazFiyat).toFixed(2));
+          } else {
+            sc.pozisyonlar.push({
+              kod: yeniAday.kod,
+              ad: yeniAday.ad,
+              altSektor: yeniAday.altSektor,
+              alisGunu: STATE.simulasyonGunu,
+              hedefAgirlikPct: satilan.hedefAgirlikPct,
+              lot: yeniLot,
+              piyasaFiyati: yeniAday.bazFiyat,
+              maliyetFiyati: Number((yeniMaliyet / yeniLot).toFixed(4)),
+              toplamMaliyetTL: yeniMaliyet,
+              guncelDegerTL: Number((yeniLot * yeniAday.bazFiyat).toFixed(2)),
+              gercekAgirlikPct: Number(((yeniMaliyet / Math.max(1, sc.toplamPortfoyDegeriTL)) * 100).toFixed(2)),
+              stopFiyati: yeniAday.chandelierStop,
+              temettuDuzeltmeliStop: yeniAday.temettuDuzeltmeliStop ?? yeniAday.chandelierStop,
+              hedefFiyati: yeniAday.aylikHedefFiyat,
+              adilDegerBaz: yeniAday.adilDegerBaz,
+              hibritSkor: yeniAday.hibritSkor,
+              atrPct: yeniAday.atrPct,
+              beta: yeniAday.beta ?? 1.0,
+              temettuVerimi: yeniAday.temettuVerimi ?? 0,
+              payBasiYillikMahzurluTL: yeniAday.payBasiYillikMahzurluTL ?? 0,
+              mahzurluGelirOrani: yeniAday.mahzurluGelirOrani ?? 0,
+              katilimDurum: yeniAday.katilimDenetim.durum,
+              lotKatmanlari: [{ lot: yeniLot, alisGunu: STATE.simulasyonGunu, birimMaliyet: mFiyat }]
+            });
+          }
           sc.islemGunlugu.push({
             zaman: zamanDamgasi,
-            tur: neden,
-            detay: `${satilan.kod} (${satilan.lot} lot, ${kapananGun}G) satıldı (Net K/Z: ${tlFormat(gerceklesenKZ)}, Arındırma: ${tlFormat(kapananArindirma)}). Yerine ${yeniAday.kod} (${yeniLot} lot) alındı.`
+            gun: STATE.simulasyonGunu,
+            tur: "IKAME_AL",
+            islemYonu: "AL",
+            kod: yeniAday.kod,
+            ad: yeniAday.ad,
+            lot: yeniLot,
+            fiyat: yeniAday.bazFiyat,
+            toplamTutar: yeniMaliyet,
+            karZararTL: null,
+            kalanNakitTL: sc.nakitBakiyeTL,
+            detay: `🟢 Satılan ${satilan.kod} yerine otomatik ${yeniLot} Lot ${yeniAday.kod} @ ${tlFormat(yeniAday.bazFiyat)} alındı (Stop: ${tlFormat(yeniAday.chandelierStop)} · Hedef: ${tlFormat(yeniAday.aylikHedefFiyat)}).`
           });
         }
-      } else {
-        sc.islemGunlugu.push({
-          zaman: zamanDamgasi,
-          tur: neden,
-          detay: `${satilan.kod} (${satilan.lot} lot, ${kapananGun}G) satıldı (Net K/Z: ${tlFormat(gerceklesenKZ)}, Arındırma: ${tlFormat(kapananArindirma)}). Bakiye nakit tamponuna eklendi.`
-        });
+      }
+
+      // Otopilottaysa satıştan artan küsurat/nakdi de otomatik hisseye çevir!
+      if (sc.isletimModu === "OTOPILOT") {
+        otopilotBostaNakitDegerlendir(sc, "OTOPILOT_ROTASYON_NAKIT_SUPURME", false);
+      }
+      if (STATE.sesliUyariAktif) {
+        zilSesiCal(neden.includes("STOP") ? "sat" : "al");
       }
 
       if (yenidenCiz) {
         senaryolariKaliciKaydet();
         ekraniCiz();
-        toastGoster("Rotasyon Tamamlandı", `${satilan.kod} pozisyonu kapatıldı ve işlem defterine işlendi.`, "info");
+        toastGoster("Rotasyon Tamamlandı", `${satilan.kod} pozisyonu kapatıldı ve işlem geçmişine işlendi.`, "info");
       }
     }
 
@@ -3128,7 +3472,16 @@
       p.hedefFiyati = Number(Math.max(Number(p.hedefFiyati || 0), p.piyasaFiyati * 1.08).toFixed(2));
       sc.islemGunlugu.push({
         zaman: `Gün ${STATE.simulasyonGunu}`,
+        gun: STATE.simulasyonGunu,
         tur: "ATR_IZ_SUREN_STOP",
+        islemYonu: "BILGI",
+        kod: p.kod,
+        ad: p.ad,
+        lot: p.lot,
+        fiyat: p.stopFiyati,
+        toplamTutar: null,
+        karZararTL: null,
+        kalanNakitTL: sc.nakitBakiyeTL,
         detay: `${p.kod} için Chandelier ATR Stop ${tlFormat(p.stopFiyati)}, yeni hedef ${tlFormat(p.hedefFiyati)} seviyesine kilitlendi.`
       });
       senaryolariKaliciKaydet();
@@ -3142,9 +3495,15 @@
       sc.isletimModu = sc.isletimModu === "OTOPILOT" ? "YARI_OTOMATIK" : "OTOPILOT";
       sc.islemGunlugu.push({
         zaman: new Date().toLocaleTimeString("tr-TR"),
+        gun: STATE.simulasyonGunu,
         tur: "MOD_DEGISIMI",
-        detay: `Senaryo işletim modu ${sc.isletimModu} olarak değiştirildi.`
+        islemYonu: "BILGI",
+        kod: "—",
+        detay: `Portföy işletim modu ${sc.isletimModu} olarak değiştirildi.`
       });
+      if (sc.isletimModu === "OTOPILOT") {
+        otopilotBostaNakitDegerlendir(sc, "OTOPILOT_MOD_ACILIS_ALIM", true);
+      }
       senaryolariKaliciKaydet();
       ekraniCiz();
       toastGoster("İşletim Modu Değişti", `${sc.ad} artık ${sc.isletimModu} modunda.`, "info");
@@ -3761,6 +4120,7 @@
       if (STATE.otoSimInterval) otoSimulasyonToggle();
       localStorage.removeItem("bist_hibrit_v41_senaryolar");
       localStorage.removeItem("bist_hibrit_v46_canli_senaryolar");
+      localStorage.removeItem("bist_hibrit_v49_canli_senaryolar");
       localStorage.removeItem("bist_hibrit_v47_sim_gunu");
       STATE.simulasyonGunu = 1;
       STATE.okunanUyarilar = {};
@@ -3873,27 +4233,30 @@
       const kont = document.getElementById("sermayeliAlSatMasasiAlan");
       if (!kont || !sc) return;
       const r = gunIciSermayeliLotRecetesiHesapla(sc);
-      const dolulukPct = Math.min(100, Math.round((r.bagliMaliyet / Math.max(1, r.sermayeTavani)) * 100));
+      const guncelPozDeger = Number((sc.pozisyonlar || []).reduce((acc, p) => acc + (p.lot * p.piyasaFiyati), 0).toFixed(2));
+      const toplamGetiriTL = Number((sc.toplamPortfoyDegeriTL - sc.baslangicButceTL).toFixed(2));
+      const toplamGetiriPct = sc.baslangicButceTL > 0 ? ((toplamGetiriTL / sc.baslangicButceTL) * 100) : 0;
+      const otopilotAktifMi = sc.isletimModu === "OTOPILOT";
 
-      const bostaNakitSatirlari = r.bostaNakitRecetesi.length > 0
-        ? r.bostaNakitRecetesi.map(item => `
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 10px; border-radius:8px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.3); margin-bottom:6px; flex-wrap:wrap;">
-              <div style="font-size:12px;">
-                🟢 <strong>${item.lot} Lot ${escHtml(item.kod)} AL</strong> @ <strong>${tlFormat(item.fiyat)}</strong>
-                <span class="badge badge-emerald" style="margin-left:4px;">Toplam: ${tlFormat(item.toplamTutar)}</span>
-                <small style="color:var(--text-muted); margin-left:6px;">🛑 Stop: ${tlFormat(item.stopFiyat)} · 🎯 Hedef: ${tlFormat(item.hedefFiyat)} (+%${sayiFormat(item.beklentiPct, 1)}) · İhtimal: %${sayiFormat(item.getiriIhtimaliPct, 1)}</small>
-              </div>
-              <div style="display:flex; gap:5px;">
+      const bostaNakitSatirlari = (!otopilotAktifMi && r.bostaNakitRecetesi.length > 0)
+        ? `<div style="margin-bottom:10px;">
+            <div style="font-size:12px; font-weight:700; margin-bottom:5px; color:var(--text-main);">
+              💡 Boştaki Nakitiniz (${tlFormat(sc.nakitBakiyeTL)}) İçin Manuel Alım Önerileri:
+            </div>
+            ${r.bostaNakitRecetesi.map(item => `
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 10px; border-radius:8px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.3); margin-bottom:6px; flex-wrap:wrap;">
+                <div style="font-size:12px;">
+                  🟢 <strong>${item.lot} Lot ${escHtml(item.kod)} AL</strong> @ <strong>${tlFormat(item.fiyat)}</strong>
+                  <span class="badge badge-emerald" style="margin-left:4px;">Toplam: ${tlFormat(item.toplamTutar)}</span>
+                </div>
                 <button class="btn btn-emerald" style="padding:3px 9px; font-size:11px;" onclick="yeniAlEmriniUygula('${sc.senaryoId}', '${escHtml(item.kod)}', ${item.lot})">✅ ${item.lot} Lot AL İşle</button>
               </div>
-            </div>
-          `).join("")
-        : `<div style="font-size:12px; color:var(--text-muted); padding:6px 8px; background:rgba(255,255,255,0.03); border-radius:6px;">
-             🔒 Boştaki nakit (${tlFormat(sc.nakitBakiyeTL)}) sermaye sınırınız dahilinde yeni tam lot alımı için düşük. Yeni alım yapmak için aşağıdan mevcut bir hisseden <strong>SAT</strong> yapabilir veya <strong>Toplam Sermaye Sınırınızı</strong> artırabilirsiniz.
-           </div>`;
+            `).join("")}
+          </div>`
+        : "";
 
       const tamSepetMetin = r.tamSermayeSepetRecetesi.map(item =>
-        `<span class="badge badge-sky" style="font-size:11.5px; padding:4px 8px;"><strong>${item.lot} Lot ${escHtml(item.kod)}</strong> @ ${tlFormat(item.fiyat)} (${tlFormat(item.toplamTutar)} · %${sayiFormat(item.agirlikPct, 0)})</span>`
+        `<span class="badge badge-sky" style="font-size:11.5px; padding:4px 8px;"><strong>${item.lot} Lot ${escHtml(item.kod)}</strong> @ ${tlFormat(item.fiyat)} (${tlFormat(item.toplamTutar)})</span>`
       ).join(" + ");
 
       // F03: Canlı AL seçim listesinde senaryonun katılım ve veto kurallarına uyan hisseleri filtrele
@@ -3909,91 +4272,88 @@
       ).join("");
 
       kont.innerHTML = `
-        <div class="panel" style="padding:12px 14px; border-color:rgba(16,185,129,0.45); background:linear-gradient(135deg, rgba(16,185,129,0.08), rgba(15,23,42,0.92));">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
-            <div>
-              <h4 style="font-size:13.5px; color:var(--emerald); display:flex; align-items:center; gap:6px;">
-                💰 Sermaye Sınırlı Gün İçi "Şu Kadar Lot Şunu Al" Reçetesi &amp; Canlı Al-Sat İşlem Masası
-              </h4>
-              <div style="font-size:11.5px; color:var(--text-muted);">
-                Belirlediğiniz toplam sermaye sınırını (<strong>${tlFormat(r.sermayeTavani)}</strong>) asla aşmadan gün içi lot-lot alım reçetesi sunar ve portföy içinde anlık AL/SAT işlemi yaptırır.
-              </div>
-            </div>
-            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-              <span style="font-size:12px; font-weight:700;">Toplam Sermaye Sınırı (₺):</span>
-              <input type="number" id="sermayeSinirInput" class="input" style="width:120px; font-weight:800;" min="1000" step="500" value="${Math.round(r.sermayeTavani)}" />
-              <button class="btn btn-primary" onclick="sermayeSiniriniKaydet('${sc.senaryoId}')">🔒 Sınırı Uygula</button>
-              <button class="btn btn-amber" onclick="sermayeLotRecetesiniSesliOku('${sc.senaryoId}')">🔊 Lot Reçetesini Sesli Dinle</button>
-            </div>
+        <div class="scen-kpis" style="grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap:10px; margin-bottom:10px;">
+          <div class="kpi-box" style="padding:10px 12px; border-color:rgba(16,185,129,0.35); background:rgba(16,185,129,0.06);">
+            <span style="font-size:11px; color:var(--text-muted);">Portföy Toplam Değeri</span>
+            <span style="font-size:17px; font-weight:800; color:var(--emerald);">${tlFormat(sc.toplamPortfoyDegeriTL)}</span>
+            <small class="${toplamGetiriTL >= 0 ? 'pos' : 'neg'}" style="font-size:11px; font-weight:700;">
+              Net K/Z: ${toplamGetiriTL >= 0 ? '+' : ''}${tlFormat(toplamGetiriTL)} (${toplamGetiriPct >= 0 ? '+' : ''}%${sayiFormat(toplamGetiriPct, 2)})
+            </small>
           </div>
-
-          <div class="scen-kpis" style="grid-template-columns: repeat(4, 1fr); margin-bottom:10px;">
-            <div class="kpi-box">
-              <span>Belirlenen Sermaye Sınırı</span>
-              <span style="color:var(--accent)">${tlFormat(r.sermayeTavani)}</span>
-            </div>
-            <div class="kpi-box">
-              <span>Hisselerde Bağlı Tutar (%${dolulukPct})</span>
-              <span>${tlFormat(r.bagliMaliyet)}</span>
-            </div>
-            <div class="kpi-box">
-              <span>Alım İçin Kullanılabilir Nakit</span>
-              <span class="pos">${tlFormat(sc.nakitBakiyeTL)}</span>
-            </div>
-            <div class="kpi-box">
-              <span>Portföy Güncel Toplam Değer</span>
-              <span style="color:var(--emerald)">${tlFormat(sc.toplamPortfoyDegeriTL)}</span>
-            </div>
+          <div class="kpi-box" style="padding:10px 12px;">
+            <span style="font-size:11px; color:var(--text-muted);">Hisselerde Çalışan Tutar</span>
+            <span style="font-size:17px; font-weight:800; color:var(--text-main);">${tlFormat(guncelPozDeger)}</span>
+            <small style="font-size:11px; color:var(--text-muted);">
+              ${(sc.pozisyonlar || []).length} Açık Hisse · Alış Maliyeti: ${tlFormat(r.bagliMaliyet)}
+            </small>
           </div>
-
-          <div style="margin-bottom:10px;">
-            <div style="font-size:12px; font-weight:700; margin-bottom:5px; color:var(--text-main);">
-              1️⃣ Boştaki Nakitiniz (${tlFormat(sc.nakitBakiyeTL)}) İçin Gün İçi Hemen Alınabilecek Lot Önerileri:
-            </div>
-            ${bostaNakitSatirlari}
+          <div class="kpi-box" style="padding:10px 12px;">
+            <span style="font-size:11px; color:var(--text-muted);">Boştaki Nakit (Lot Küsuratı)</span>
+            <span style="font-size:17px; font-weight:800; color:var(--accent);">${tlFormat(sc.nakitBakiyeTL)}</span>
+            <small style="font-size:11px; color:${otopilotAktifMi ? 'var(--emerald)' : 'var(--amber)'}; font-weight:700;">
+              ${otopilotAktifMi ? '🤖 Otopilot Otomatik Alımda' : '🧑‍✈️ Yarı Otomatik (Onaylı)'}
+            </small>
           </div>
-
-          <div style="margin-bottom:12px; padding:8px 10px; border-radius:8px; background:rgba(56,189,248,0.07); border:1px solid rgba(56,189,248,0.28);">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
-              <span style="font-size:12px; font-weight:700; color:var(--accent);">
-                2️⃣ ${tlFormat(r.sermayeTavani)} Toplam Sermaye Sınırınıza Göre Gün İçi İdeal Tam Sepet Reçetesi ("Şu Kadar Lot Şunu Al"):
-              </span>
-              <button class="btn btn-emerald" style="padding:3px 9px; font-size:11px;" onclick="sermayeSinirinaGoreSepetiKur('${sc.senaryoId}')">
-                🚀 Bu Lot Reçetesiyle Portföyü Kur (${tlFormat(r.sermayeTavani)})
-              </button>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-              ${tamSepetMetin}
-              <span class="badge badge-amber" style="font-size:11px;">Artan Nakit Tamponu: ${tlFormat(r.kalanSepetNakit)}</span>
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:10px; padding-top:8px; border-top:1px solid var(--border);">
-            <div style="background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.25); border-radius:8px; padding:8px 10px;">
-              <div style="font-size:12px; font-weight:800; color:var(--emerald); margin-bottom:6px;">🟢 Portföye Gün İçi Canlı AL İşlemi (Sermaye Korumalı)</div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                <select id="canliAlHisseSelect" class="select" style="flex:1; min-width:150px;" onchange="canliAlMaksLotGuncelle('${sc.senaryoId}')">
-                  ${tumHisseSecenekleri}
-                </select>
-                <input type="number" id="canliAlLotInput" class="input" style="width:78px;" min="1" value="1" placeholder="Lot" />
-                <button class="btn btn-emerald" onclick="portfoydeCanliAlIslemiYap('${sc.senaryoId}')">🟢 AL İşle</button>
-              </div>
-              <div id="canliAlBilgiSatiri" style="font-size:11px; color:var(--text-muted); margin-top:4px;"></div>
-            </div>
-
-            <div style="background:rgba(244,63,94,0.05); border:1px solid rgba(244,63,94,0.25); border-radius:8px; padding:8px 10px;">
-              <div style="font-size:12px; font-weight:800; color:var(--rose); margin-bottom:6px;">🔴 Portföyden Gün İçi Canlı SAT İşlemi (Nakit Üret)</div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                <select id="canliSatHisseSelect" class="select" style="flex:1; min-width:150px;">
-                  ${portfoyHisseSecenekleri || `<option value="">Portföyde açık hisse yok</option>`}
-                </select>
-                <input type="number" id="canliSatLotInput" class="input" style="width:78px;" min="1" value="1" placeholder="Lot" />
-                <button class="btn btn-rose" onclick="portfoydeCanliSatIslemiYap('${sc.senaryoId}')">🔴 SAT İşle</button>
-              </div>
-              <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Satılan lotların tutarı anında kullanılabilir nakit bakiyenize eklenir.</div>
-            </div>
+          <div class="kpi-box" style="padding:10px 12px;">
+            <span style="font-size:11px; color:var(--text-muted);">Sermaye Sınırı &amp; Kapanan K/Z</span>
+            <span style="font-size:17px; font-weight:800; color:var(--text-main);">${tlFormat(r.sermayeTavani)}</span>
+            <small class="${(sc.gerceklesenKarZararTL || 0) >= 0 ? 'pos' : 'neg'}" style="font-size:11px; font-weight:700;">
+              Gerçekleşen K/Z: ${(sc.gerceklesenKarZararTL || 0) >= 0 ? '+' : ''}${tlFormat(sc.gerceklesenKarZararTL || 0)}
+            </small>
           </div>
         </div>
+
+        <details style="background:rgba(15,23,42,0.75); border:1px solid var(--border); border-radius:10px; padding:8px 12px;">
+          <summary style="cursor:pointer; font-size:12.5px; font-weight:700; color:var(--accent); user-select:none; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <span>⚙️ Manuel Hisse AL / SAT İşlemi Yap veya Sermaye Sınırını Değiştir (${tlFormat(r.sermayeTavani)}) ▾</span>
+            <span style="font-size:11px; color:var(--text-muted); font-weight:500;">(Otopilot açıkken al-sat işlemleri otomatik yürütülür; manuel müdahale için tıklayın)</span>
+          </summary>
+
+          <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <span style="font-size:12px; font-weight:700;">Toplam Sermaye Sınırı (₺):</span>
+                <input type="number" id="sermayeSinirInput" class="input" style="width:120px; font-weight:800;" min="1000" step="500" value="${Math.round(r.sermayeTavani)}" />
+                <button class="btn btn-primary" onclick="sermayeSiniriniKaydet('${sc.senaryoId}')">🔒 Sınırı Uygula</button>
+              </div>
+              <button class="btn btn-emerald" style="padding:5px 10px; font-size:11.5px;" onclick="sermayeSinirinaGoreSepetiKur('${sc.senaryoId}')">
+                🚀 ${tlFormat(r.sermayeTavani)} İdeal Sepetle Portföyü Yeniden Kur
+              </button>
+            </div>
+
+            ${bostaNakitSatirlari}
+
+            <div style="margin-bottom:10px; padding:7px 10px; border-radius:8px; background:rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.22); font-size:11.5px;">
+              <strong style="color:var(--accent);">İdeal Tam Sepet Dağılımı:</strong> ${tamSepetMetin}
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:10px;">
+              <div style="background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.25); border-radius:8px; padding:8px 10px;">
+                <div style="font-size:12px; font-weight:800; color:var(--emerald); margin-bottom:6px;">🟢 Portföye Manuel AL İşlemi</div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                  <select id="canliAlHisseSelect" class="select" style="flex:1; min-width:140px;" onchange="canliAlMaksLotGuncelle('${sc.senaryoId}')">
+                    ${tumHisseSecenekleri}
+                  </select>
+                  <input type="number" id="canliAlLotInput" class="input" style="width:74px;" min="1" value="1" placeholder="Lot" />
+                  <button class="btn btn-emerald" onclick="portfoydeCanliAlIslemiYap('${sc.senaryoId}')">🟢 AL İşle</button>
+                </div>
+                <div id="canliAlBilgiSatiri" style="font-size:11px; color:var(--text-muted); margin-top:4px;"></div>
+              </div>
+
+              <div style="background:rgba(244,63,94,0.05); border:1px solid rgba(244,63,94,0.25); border-radius:8px; padding:8px 10px;">
+                <div style="font-size:12px; font-weight:800; color:var(--rose); margin-bottom:6px;">🔴 Portföyden Manuel SAT İşlemi</div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                  <select id="canliSatHisseSelect" class="select" style="flex:1; min-width:140px;">
+                    ${portfoyHisseSecenekleri || `<option value="">Portföyde açık hisse yok</option>`}
+                  </select>
+                  <input type="number" id="canliSatLotInput" class="input" style="width:74px;" min="1" value="1" placeholder="Lot" />
+                  <button class="btn btn-rose" onclick="portfoydeCanliSatIslemiYap('${sc.senaryoId}')">🔴 SAT İşle</button>
+                </div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Satılan lotların tutarı anında nakit bakiyenize eklenir.</div>
+              </div>
+            </div>
+          </div>
+        </details>
       `;
       canliAlMaksLotGuncelle(sc.senaryoId);
     }
@@ -4191,13 +4551,22 @@
 
       sc.islemGunlugu.push({
         zaman: new Date().toLocaleTimeString("tr-TR"),
+        gun: STATE.simulasyonGunu,
         tur: "CANLI_AL_ISLEMI",
+        islemYonu: "AL",
+        kod: kod,
+        ad: h.ad,
+        lot: istenenLot,
+        fiyat: h.bazFiyat,
+        toplamTutar: toplamMaliyet,
+        karZararTL: null,
+        kalanNakitTL: sc.nakitBakiyeTL,
         detay: `🟢 ${kod} hissesinden ${istenenLot} lot @ ${tlFormat(h.bazFiyat)} (Toplam: ${tlFormat(toplamMaliyet)}) alındı. Kalan nakit: ${tlFormat(sc.nakitBakiyeTL)}.`
       });
 
       senaryolariKaliciKaydet();
       ekraniCiz();
-      sesliKonus(`${h.ad} hissesinden ${istenenLot} lot alım işlemi ${h.bazFiyat.toFixed(2)} liradan portföye işlendi. Kalan nakitiniz ${Math.round(sc.nakitBakiyeTL)} lira.`, false);
+      zilSesiCal("al");
       toastGoster("🟢 Canlı AL İşlemi Tamamlandı", `${istenenLot} Lot ${kod} (${tlFormat(toplamMaliyet)}) portföye eklendi.`, "success");
     }
 
@@ -4262,13 +4631,22 @@
 
       sc.islemGunlugu.push({
         zaman: new Date().toLocaleTimeString("tr-TR"),
+        gun: STATE.simulasyonGunu,
         tur: "CANLI_SAT_ISLEMI",
+        islemYonu: "SAT",
+        kod: kod,
+        ad: p.ad,
+        lot: satilacakLot,
+        fiyat: p.piyasaFiyati,
+        toplamTutar: nakitGiris,
+        karZararTL: gerceklesenKZ,
+        kalanNakitTL: sc.nakitBakiyeTL,
         detay: `🔴 ${kod} hissesinden ${satilacakLot} lot @ ${tlFormat(p.piyasaFiyati)} satıldı (+${tlFormat(nakitGiris)} nakit, Net K/Z: ${tlFormat(gerceklesenKZ)}, Arındırma: ${tlFormat(arinPayi)}).`
       });
 
       senaryolariKaliciKaydet();
       ekraniCiz();
-      sesliKonus(`${p.ad} hissesinden ${satilacakLot} lot satış işlemi gerçekleşti. ${Math.round(nakitGiris)} lira nakit bakiyenize eklendi.`, false);
+      zilSesiCal("sat");
       toastGoster("🔴 Canlı SAT İşlemi Tamamlandı", `${satilacakLot} Lot ${kod} satıldı (+${tlFormat(nakitGiris)} nakit).`, "info");
     }
 

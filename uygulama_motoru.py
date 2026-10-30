@@ -1205,17 +1205,33 @@ def build_default_scenarios(evaluated_stocks):
     s1_cands = pick_sector_diversified(s1_pool, 4, max_per_sector=1)
     s1_w = compute_model_weights(s1_cands, "TERS_ATR_HRP")
     s1_pos, s1_cash = allocate_smart_lots(s1_cands, 10000.0, s1_w, cash_buffer_pct=0.0, current_day=1)
+    s1_codes = {x["kod"] for x in s1_cands}
 
-    s2_cands = pick_sector_diversified(s1_pool, 3, max_per_sector=1)
+    s2_pool = sorted(
+        s1_pool,
+        key=lambda x: (x.get("temettuVerimi", 0.0) * 10.0 + x.get("adilDegerPotansiyelPct", 0.0) * 0.45 + (-18.0 if x["kod"] in s1_codes else 18.0)),
+        reverse=True,
+    )
+    s2_cands = pick_sector_diversified(s2_pool, 3, max_per_sector=1)
     s2_w = compute_model_weights(s2_cands, "SABIT_40_35_25")
     s2_pos, s2_cash = allocate_smart_lots(s2_cands, 10000.0, s2_w, cash_buffer_pct=0.0, current_day=1)
+    s2_codes = {x["kod"] for x in s2_cands}
 
-    s3_pool = [s for s in valid if s.get("puanMomentum", 0) >= 10.0]
+    s3_pool = sorted(
+        valid,
+        key=lambda x: (x.get("puanMomentum", 0.0) * 3.0 + x.get("getiriIhtimaliPct", 50.0)),
+        reverse=True,
+    )
     s3_cands = pick_sector_diversified(s3_pool, 5, max_per_sector=1)
     s3_w = compute_model_weights(s3_cands, "ESIT_RISK_ERC")
     s3_pos, s3_cash = allocate_smart_lots(s3_cands, 10000.0, s3_w, cash_buffer_pct=0.0, current_day=1)
 
-    s4_cands = pick_sector_diversified(s1_pool[1:] if len(s1_pool) > 3 else s1_pool, 3, max_per_sector=1)
+    s4_pool = sorted(
+        s1_pool,
+        key=lambda x: (x.get("roic", 20.0) * 1.1 + x.get("hibritSkor", 50.0) + (-25.0 if x["kod"] in s2_codes else 25.0)),
+        reverse=True,
+    )
+    s4_cands = pick_sector_diversified(s4_pool, 4, max_per_sector=1)
     s4_w = compute_model_weights(s4_cands, "TERS_ATR_HRP")
     s4_pos, s4_cash = allocate_smart_lots(s4_cands, 10000.0, s4_w, cash_buffer_pct=10.0, current_day=1)
 
@@ -1227,6 +1243,24 @@ def build_default_scenarios(evaluated_stocks):
         purif_total = round(
             sum(calculate_tkbb_purification(p, holding_days=1)["toplamArindirmaTL"] for p in positions), 2
         )
+        running_cash = 10000.0
+        log_entries = []
+        for p in positions:
+            running_cash = round(max(0.0, running_cash - p["toplamMaliyetTL"]), 2)
+            log_entries.append({
+                "zaman": now_iso,
+                "gun": 1,
+                "tur": "KURULUM_AL",
+                "islemYonu": "AL",
+                "kod": p["kod"],
+                "ad": p["ad"],
+                "lot": p["lot"],
+                "fiyat": p["piyasaFiyati"],
+                "toplamTutar": p["toplamMaliyetTL"],
+                "karZararTL": None,
+                "kalanNakitTL": running_cash,
+                "detay": f"Portföy başlangıç alımı: {p['lot']} Lot {p['kod']} @ {p['piyasaFiyati']:.2f} TL (Stop: {p['stopFiyati']:.2f} TL · Hedef: {p['hedefFiyati']:.2f} TL)"
+            })
         return {
             "senaryoId": sid,
             "ad": name,
@@ -1245,20 +1279,14 @@ def build_default_scenarios(evaluated_stocks):
             "degerGecmisi": [10000.0, cur_val],
             "olusturmaZamani": now_iso,
             "pozisyonlar": positions,
-            "islemGunlugu": [
-                {
-                    "zaman": now_iso,
-                    "tur": "SENARYO_KURULUM",
-                    "detay": f"{name} ({mode}) 10.000 TL bütçe ve {len(positions)} hisse ile başlatıldı (Komisyon+Slippage dahil)."
-                }
-            ]
+            "islemGunlugu": log_entries
         }
 
     return {
-        "S1": pack_scenario("S1", "Senaryo 1 · Katılım Muhafazakâr (Korelasyonlu HRP · 4 Hisse)", "OTOPILOT", True, "TERS_ATR_HRP", s1_pos, s1_cash, 0.0),
-        "S2": pack_scenario("S2", "Senaryo 2 · Klasik Hibrit v4 (%40-%35-%25 · 3 Hisse)", "OTOPILOT", True, "SABIT_40_35_25", s2_pos, s2_cash, 0.0),
-        "S3": pack_scenario("S3", "Senaryo 3 · Momentum Teyitli ERC (5 Hisse · Tüm BIST)", "YARI_OTOMATIK", False, "ESIT_RISK_ERC", s3_pos, s3_cash, 0.0),
-        "S4": pack_scenario("S4", "Senaryo 4 · Co-Pilot Özel Sepet (%10 Nakit Tamponlu)", "YARI_OTOMATIK", True, "TERS_ATR_HRP", s4_pos, s4_cash, 10.0),
+        "S1": pack_scenario("S1", "Portföy 1 · Katılım Muhafazakâr HRP (4 Hisse)", "OTOPILOT", True, "TERS_ATR_HRP", s1_pos, s1_cash, 0.0),
+        "S2": pack_scenario("S2", "Portföy 2 · Değer & Temettü Odaklı (%40-%35-%25 · 3 Hisse)", "OTOPILOT", True, "SABIT_40_35_25", s2_pos, s2_cash, 0.0),
+        "S3": pack_scenario("S3", "Portföy 3 · Momentum Teyitli ERC (5 Hisse · Tüm BIST)", "YARI_OTOMATIK", False, "ESIT_RISK_ERC", s3_pos, s3_cash, 0.0),
+        "S4": pack_scenario("S4", "Portföy 4 · Kişisel / Esnek Sepet (%10 Nakit Tamponlu)", "YARI_OTOMATIK", True, "TERS_ATR_HRP", s4_pos, s4_cash, 10.0),
     }
 
 

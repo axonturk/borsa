@@ -251,6 +251,59 @@ def run_all_tests():
         if "senaryoSemasiDogrula" not in html_text or "tumBist100CanliYukle" not in html_text:
             failures.append("TEST 23b HATA (F21/BIST100): senaryoSemasiDogrula veya tumBist100CanliYukle eksik!")
 
+        # TEST 25 (v4.9 Otopilot Boşta Nakit Süpürücü, 4 Farklı Portföy Geçişi, Tablo İşlem Geçmişi & Sade Ekran):
+        import subprocess
+        node_test_js = r"""
+const fs = require('fs'), vm = require('vm');
+const html = fs.readFileSync(process.argv[1], 'utf8');
+const m = html.match(/<script>([\s\S]*?)<\/script>/);
+const els = {};
+const getEl = (id) => {
+  if (!els[id]) els[id] = { id, innerHTML: '', textContent: '', value: 'S1', style: {}, classList: { toggle(){}, add(){}, remove(){} }, setAttribute(){}, appendChild(){} };
+  return els[id];
+};
+const ctx = {
+  window: { addEventListener(){} },
+  document: { getElementById: getEl, querySelectorAll: () => [], createElement: () => getEl('tmp'), body: { classList: { toggle: () => false } } },
+  localStorage: { getItem: () => null, setItem(){}, removeItem(){} },
+  navigator: {}, AudioContext: function(){}, webkitAudioContext: function(){},
+  fetch: () => Promise.resolve({ ok: false }),
+  setTimeout: () => {}, clearTimeout: () => {}, setInterval: () => {}, clearInterval: () => {},
+  console, Math, Date, Number, String, Boolean, Array, Object, Set, Map, JSON, Error, RegExp, parseInt, parseFloat, isNaN, isFinite
+};
+vm.createContext(ctx);
+vm.runInContext(m[1] + `
+;(() => {
+  const { sektorMed, islenmis } = istemciEvreniHesapla([...YEREL_DOGRULANMIS_EVREN, ...GENIS_BIST_EK_HAVUZU_JS]);
+  STATE.sektorMedyanlari = sektorMed;
+  STATE.hisseler = islenmis;
+  STATE.senaryolar = varsayilanSenaryolariInsaEt(islenmis);
+  const imzalar = new Set();
+  for (const id of ['S1', 'S2', 'S3', 'S4']) {
+    aktifSenaryoDegistir(id);
+    if (STATE.aktifSenaryoId !== id) throw new Error('Portfoy secimi degismedi: ' + id);
+    const sc = STATE.senaryolar[id];
+    const imza = sc.pozisyonlar.map(p => p.kod).join(',');
+    imzalar.add(imza);
+  }
+  if (imzalar.size < 4) throw new Error('4 portfoyun hisse dagilimlari birbirinden farkli degil: ' + Array.from(imzalar).join(' | '));
+  const s1 = STATE.senaryolar.S1;
+  s1.pozisyonlar.pop();
+  s1.nakitBakiyeTL = 2504.81;
+  s1.yatirilanTutarTL = Number(s1.pozisyonlar.reduce((a, b) => a + b.toplamMaliyetTL, 0).toFixed(2));
+  const alimAdet = otopilotBostaNakitDegerlendir(s1, 'Otopilot Nakit Testi', false);
+  if (alimAdet < 1 || s1.nakitBakiyeTL >= 1000) throw new Error('Otopilot 2504.81 TL bosta nakiti otomatik yatirmadi! Kalan nakit: ' + s1.nakitBakiyeTL);
+  aktifSenaryoDegistir('S1');
+  if (!document.getElementById('islemGunluguKonteyner').innerHTML.includes('OTOPİLOT AL')) throw new Error('Canli islem gecmisi tablosunda OTOPİLOT AL satiri yok!');
+  if (!document.getElementById('sermayeliAlSatMasasiAlan').innerHTML.includes('<details')) throw new Error('Manuel islem masasi katlanabilir details cekmecesine alinmamis!');
+  console.log('NODE_V49_OK');
+})();
+`, ctx);
+"""
+        proc = subprocess.run(["node", "-e", node_test_js, str(Path(__file__).resolve().parent / "index.html")], capture_output=True, text=True, encoding="utf-8")
+        if proc.returncode != 0 or "NODE_V49_OK" not in proc.stdout:
+            failures.append(f"TEST 25 HATA (v4.9 Otopilot/Portföy Geçişi/İşlem Geçmişi): {proc.stderr or proc.stdout}")
+
     finally:
         # F19: Ne olursa olsun üretim dosyalarını orijinal byte durumuna geri yükle
         if snap_bytes_before is not None:
