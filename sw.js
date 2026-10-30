@@ -1,11 +1,13 @@
 const CACHE_PREFIX = 'bist-hibrit-';
-const CACHE_NAME = 'bist-hibrit-v4.7-kurumsal-pwa-cache';
+const CACHE_NAME = 'bist-hibrit-v4.8-kurumsal-pwa-cache';
 const NETWORK_TIMEOUT_MS = 4500;
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './dogrulanmis_piyasa_snapshot.json',
+  './icon-192.png',
+  './icon-512.png',
   './icon-192.svg',
   './icon-512.svg'
 ];
@@ -14,13 +16,15 @@ function getCanonicalCacheKey(requestOrUrl) {
   try {
     const rawUrl = typeof requestOrUrl === 'string' ? requestOrUrl : requestOrUrl.url;
     const parsed = new URL(rawUrl, self.location ? self.location.origin : 'https://axonturk.github.io');
-    // Sorgu parametreli (?t=...) snapshot ve statik dosya isteklerini tek kanonik anahtara indirge (F18 düzeltmesi)
+    // Sorgu parametreli (?t=..., ?app=...) snapshot ve statik dosya isteklerini tek kanonik anahtara indirge (F18 düzeltmesi)
     if (
+      parsed.pathname.endsWith('/') ||
       parsed.pathname.endsWith('dogrulanmis_piyasa_snapshot.json') ||
       parsed.pathname.endsWith('index.html') ||
       parsed.pathname.endsWith('manifest.json') ||
       parsed.pathname.endsWith('sw.js') ||
-      parsed.pathname.endsWith('.svg')
+      parsed.pathname.endsWith('.svg') ||
+      parsed.pathname.endsWith('.png')
     ) {
       return parsed.origin + parsed.pathname;
     }

@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0ea5e9" />
-  <meta name="description" content="BIST Hibrit Analiz, Adil Değer, XKTUM Katılım Denetimi, TKBB 3.6.1 Arındırma ve 4 Paralel Senaryolu Otopilot Portföy Simülatörü v4.7 PWA" />
-  <title>BIST Hibrit Terminal v4.7 PWA — Çoklu Senaryo &amp; Kurumsal Risk Yönetimi</title>
-  <link rel="manifest" href="./manifest.json" />
-  <link rel="icon" type="image/svg+xml" href="./icon-192.svg" />
-  <link rel="apple-touch-icon" href="./icon-192.svg" />
+  <meta name="description" content="BIST Hibrit Al-Sat, Canlı BIST 100+ Tarayıcı, Sermaye Sınırlı Lot Reçetesi ve 4 Senaryolu Portföy Terminali v4.8 PWA" />
+  <title>BIST Al-Sat &amp; Portföy Terminali v4.8 PWA</title>
+  <link rel="manifest" href="./manifest.json?v=48" />
+  <link rel="icon" type="image/png" href="./icon-192.png" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
   <style>
     :root {
       --bg-main: #070b14;
@@ -297,86 +297,70 @@
     .dropdown-menu.open { display: flex; }
   </style>
 </head>
-<body>
+<body class="sade-tablo">
   <div class="container">
-    <!-- 1. ÜST KURUMSAL TELEMETRİ VE KONTROL ÇUBUĞU -->
-    <header class="topbar">
+    <!-- 1. SADELEŞTİRİLMİŞ ÜST KONTROL ÇUBUĞU -->
+    <header class="topbar" style="padding:10px 14px; margin-bottom:10px;">
       <div class="brand">
-        <div class="brand-logo">v4.7</div>
+        <div class="brand-logo">v4.8</div>
         <div>
-          <h1>BIST Hibrit Analiz, Adil Değer &amp; Sermaye Sınırlı Al-Sat Terminali <span class="badge badge-emerald">PWA v4.7</span> <span class="badge badge-sky" id="agDurumRozet">🟢 Çevrimiçi</span> <span class="badge badge-amber" id="bistSeansSaatRozet">🏛️ Seans Kontrol Ediliyor</span></h1>
-          <div class="brand-sub">
-            <span id="veriKaynagiEtiket">📡 Veri Kaynağı: Yükleniyor...</span>
+          <h1 style="font-size:15px;">BIST Al-Sat &amp; Portföy Terminali <span class="badge badge-sky" id="agDurumRozet">🟢 Canlı</span> <span class="badge badge-amber" id="bistSeansSaatRozet">🏛️ Seans</span></h1>
+          <div class="brand-sub" style="font-size:11px;">
+            <span id="veriKaynagiEtiket">📡 Canlı BIST 100+ Akışı</span>
             <span>•</span>
-            <span id="guncellemeZamaniEtiket">⏱️ Son Güncelleme: --</span>
-            <span>•</span>
-            <span class="badge badge-sky" id="muhasebeTemeliEtiket">TMS 29 Enflasyon Muhasebesi (2026/06 · 42 Çekirdek + BIST 100 Canlı Evren)</span>
+            <span id="guncellemeZamaniEtiket">⏱️ Güncel</span>
+            <span id="muhasebeTemeliEtiket" style="display:none;">TMS 29</span>
           </div>
         </div>
       </div>
-      <div class="top-actions">
-        <button class="btn btn-emerald" id="canliOtoTakipBtn" onclick="canliOtoTakipToggle()" title="Her 30 saniyede bir canlı verileri ve sinyalleri otomatik günceller">
-          🟢 Canlı Takip (30sn)
+      <div class="top-actions" style="gap:6px;">
+        <button class="btn btn-primary" onclick="kisiselPortfoyModalAc()" title="Sermayenizi ve elinizdeki hisseleri girip canlı takip başlatın">
+          📱 Sermaye &amp; Portföy Kur
         </button>
-        <button class="btn btn-amber" id="sesliUyariBtn" onclick="sesliUyariToggle()" title="Sesli AL/SAT emir uyarılarını açar/kapatır">
-          🔊 Ses: AÇIK
+        <button class="btn btn-amber" id="sesliUyariBtn" onclick="sesliUyariToggle()" title="Sadece AL ve SAT emir sinyali geldiğinde küçük zil sesi çalar (Günlük raporları sesli okumaz)">
+          🔔 Emir Zili: AÇIK
         </button>
-        <button class="btn btn-emerald" onclick="alSatEmirleriniSesliOku()" title="Sermayenize göre güncel AL ve SAT emirlerini lot ve fiyatlarıyla Türkçe sesli okur">
-          📢 AL/SAT Emirlerini Sesli Oku
-        </button>
-        <button class="btn btn-amber" onclick="sabahBrifingiSesliVeGorselAc(true)" title="Sabah açılış önerilerini ve portföy durumunu sesli okur">
-          ☀️ Sabah Brifingi
-        </button>
-        <button class="btn btn-primary" onclick="gunSonuRaporuAc()" title="4 senaryonun ve kişisel portföyünüzün Gün Sonu Z-Raporunu açar">
-          📊 Gün Sonu Raporu
-        </button>
-        <button class="btn" onclick="kisiselPortfoyModalAc()" title="Sermayenizi ve elinizdeki hisseleri girip canlı takip başlatın">
-          📱 Portföy &amp; Sermaye Kur
-        </button>
-        <button class="btn" onclick="whatsappEmirleriPaylas()" title="Günün AL/SAT emirlerini ve lot reçetesini WhatsApp veya panoya tek tıkla kopyalar/gönderir">
-          📲 WhatsApp'a Gönder
-        </button>
-        <button class="btn" id="buyukYaziBtn" onclick="buyukYaziToggle()" title="Rakamları ve tabloları %20 daha büyük ve okunaklı yapar">
-          🔠 Büyük Yazı (A+)
+        <button class="btn btn-emerald" id="pwaInstallBtn" onclick="pwaYukle()" title="Uygulamayı telefonunuza ana ekran uygulaması olarak yükleyin">
+          📲 Telefona Yükle
         </button>
         <div class="dropdown-wrap">
           <button class="btn" onclick="document.getElementById('araclarMenu').classList.toggle('open')">
-            🛠️ Araçlar &amp; Simülasyon ▾
+            🛠️ Menü ▾
           </button>
           <div class="dropdown-menu" id="araclarMenu">
-            <button class="btn" onclick="portfoyumuSesliOku()">🎙️ Portföy Özeti Sesli Oku</button>
-            <button class="btn" onclick="verileriZorlaYenile()">🔄 Şimdi Canlı Taramayı Yenile</button>
-            <button class="btn" onclick="gunlukSimulasyonAdimiIlerlet()">⚡ +1 Gün Simülasyon İlerlet</button>
+            <button class="btn btn-primary" onclick="gunSonuRaporuAc(); document.getElementById('araclarMenu').classList.remove('open')">📊 Gün Sonu Z-Raporu (Yazılı)</button>
+            <button class="btn btn-emerald" onclick="whatsappEmirleriPaylas(); document.getElementById('araclarMenu').classList.remove('open')">📲 Emirleri WhatsApp'a Gönder</button>
+            <button class="btn" id="buyukYaziBtn" onclick="buyukYaziToggle()">🔠 Büyük Yazı (A+)</button>
+            <button class="btn" id="sadeTabloBtn" onclick="sadeTabloToggle()">👁️ Tablo: Sade Görünüm (8 Sütun)</button>
+            <button class="btn btn-emerald" id="canliOtoTakipBtn" onclick="canliOtoTakipToggle()">🟢 Canlı Oto-Takip: Aktif</button>
+            <button class="btn" onclick="verileriZorlaYenile(); document.getElementById('araclarMenu').classList.remove('open')">🔄 Şimdi Canlı Veriyi Yenile</button>
+            <button class="btn" onclick="temaDegistir()">🌓 Açık / Koyu Tema Değiştir</button>
+            <button class="btn" onclick="senaryoSihirbaziAc(); document.getElementById('araclarMenu').classList.remove('open')">🎛️ Gelişmiş Senaryo Sihirbazı</button>
+            <button class="btn" onclick="gunlukSimulasyonAdimiIlerlet()">⚡ +1 Gün Test Simülasyonu</button>
             <button class="btn" id="otoSimBtn" onclick="otoSimulasyonToggle()">⏱️ Hızlı Test (4sn): Kapalı</button>
-            <button class="btn" onclick="senaryoSihirbaziAc()">🎛️ Gelişmiş Senaryo Sihirbazı</button>
             <button class="btn" onclick="yedekIndir()">💾 JSON Yedek İndir</button>
             <button class="btn" onclick="document.getElementById('yedekDosyaInput').click()">📂 Yedek Dosyası Yükle</button>
             <button class="btn btn-rose" onclick="varsayilanlaraSifirla()">🔄 Varsayılanlara Sıfırla</button>
-            <button class="btn" id="pwaInstallBtn" style="display:none;" onclick="pwaYukle()">📲 PWA Uygulamasını Kur</button>
-            <button class="btn" onclick="temaDegistir()">🌓 Açık / Koyu Tema Değiştir</button>
           </div>
         </div>
         <input type="file" id="yedekDosyaInput" accept=".json" style="display:none" onchange="yedekYukle(event)" />
       </div>
     </header>
 
-    <!-- 1B. OKUNABİLİRLİK ODAK SEKMELERİ (EKRAN KALABALIĞINI ÖNLEYEN SABİT HIZLI GEÇİŞ ÇUBUĞU) -->
-    <nav class="nav-tabs" id="ustSekmeCubugu">
+    <!-- 1B. SADE 4 SEKMELİ HIZLI GEÇİŞ ÇUBUĞU (VARSAYILAN: AL-SAT & PORTFÖYÜM) -->
+    <nav class="nav-tabs" id="ustSekmeCubugu" style="margin-bottom:12px;">
       <div class="nav-tab-group">
-        <button class="nav-tab active" id="tabBtn_TUMU" onclick="gorunumSekmesiDegistir('TUMU')">🌐 Tüm Ekran (Tam Terminal)</button>
-        <button class="nav-tab" id="tabBtn_KOKPIT" onclick="gorunumSekmesiDegistir('KOKPIT')">☀️ 1. Sabah Özeti &amp; İlk 5 Öneri</button>
-        <button class="nav-tab" id="tabBtn_PORTFOY" onclick="gorunumSekmesiDegistir('PORTFOY')">💼 2. Portföy &amp; Sermayeli Al-Sat Masası</button>
-        <button class="nav-tab" id="tabBtn_SENARYO" onclick="gorunumSekmesiDegistir('SENARYO')">🧪 3. 4 Senaryo &amp; Grafik Yarışı</button>
-        <button class="nav-tab" id="tabBtn_TAKVIM" onclick="gorunumSekmesiDegistir('TAKVIM')">📅 4. Bilanço &amp; Temettü Takvimi</button>
-        <button class="nav-tab" id="tabBtn_TARAYICI" onclick="gorunumSekmesiDegistir('TARAYICI')">🔍 5. Hisse Tarayıcı &amp; Adil Değer (42 Hisse)</button>
-      </div>
-      <div style="display:flex; gap:6px; align-items:center;">
-        <button class="btn" id="sadeTabloBtn" onclick="sadeTabloToggle()" style="padding:5px 10px; font-size:11.5px;">👁️ Tablo: Uzman Görünüm (14 Sütun)</button>
+        <button class="nav-tab active" id="tabBtn_PORTFOY" onclick="gorunumSekmesiDegistir('PORTFOY')">💼 1. Al-Sat &amp; Portföyüm</button>
+        <button class="nav-tab" id="tabBtn_TARAYICI" onclick="gorunumSekmesiDegistir('TARAYICI')">🔍 2. Hisse Ara (KARSN, THYAO...)</button>
+        <button class="nav-tab" id="tabBtn_KOKPIT" onclick="gorunumSekmesiDegistir('KOKPIT')">🎯 3. Günün İlk 5 Önerisi</button>
+        <button class="nav-tab" id="tabBtn_SENARYO" onclick="gorunumSekmesiDegistir('SENARYO')">📊 4. 4 Senaryo &amp; Takvim</button>
+        <button class="nav-tab" id="tabBtn_TAKVIM" onclick="gorunumSekmesiDegistir('TAKVIM')" style="display:none;">📅 Takvim</button>
+        <button class="nav-tab" id="tabBtn_TUMU" onclick="gorunumSekmesiDegistir('TUMU')">🌐 Tümü</button>
       </div>
     </nav>
 
-    <!-- 2. MAKRO PARAMETRELER, RISKSİZ FAİZ (%37) VE PİYASA REJİMİ -->
-    <section class="macro-strip" id="sec_MAKRO">
+    <!-- 2. MAKRO PARAMETRELER (SADECE SENARYO / TÜMÜ SEKMESİNDE GÖRÜNÜR) -->
+    <section class="macro-strip sec-hidden" id="sec_MAKRO">
       <div class="macro-card">
         <span class="macro-label">Türkiye Risksiz Faiz (Rf) &amp; TÜFE</span>
         <div class="macro-val">
@@ -407,14 +391,14 @@
       </div>
     </section>
 
-    <!-- 2A. OTOMATİK SABAH SEANS AÇILIŞ BRİFİNGİ VE GÜNÜN AL/SAT ÖNERİ KARTI -->
-    <section class="panel" id="sabahBrifingBanner" style="margin-bottom:16px; border-color: rgba(245,158,11,0.55); background: linear-gradient(90deg, rgba(245,158,11,0.10), rgba(16,185,129,0.07)); padding:12px 16px;"></section>
+    <!-- 2A. SABAH SEANS ÖZETİ (SADECE İLK 5 / TÜMÜ SEKMESİNDE GÖRÜNÜR) -->
+    <section class="panel sec-hidden" id="sabahBrifingBanner" style="margin-bottom:14px; border-color: rgba(245,158,11,0.55); background: linear-gradient(90deg, rgba(245,158,11,0.10), rgba(16,185,129,0.07)); padding:12px 16px;"></section>
 
-    <!-- 2B. GÜNÜN GETİRİ İHTİMALİ EN YÜKSEK 5 HİSSESİ (TÜM EVREN OTOMATİK ANALİZ VİTRİNİ) -->
-    <section class="panel" id="sec_ILK5" style="margin-bottom:16px; border-color: rgba(16,185,129,0.45); background: linear-gradient(180deg, rgba(16,185,129,0.06), var(--bg-card));">
+    <!-- 2B. GÜNÜN GETİRİ İHTİMALİ EN YÜKSEK 5 HİSSESİ -->
+    <section class="panel sec-hidden" id="sec_ILK5" style="margin-bottom:14px; border-color: rgba(16,185,129,0.45); background: linear-gradient(180deg, rgba(16,185,129,0.06), var(--bg-card));">
       <div class="section-title" style="margin-bottom:10px;">
         <div>
-          <span>🎯 Günün Getiri İhtimali En Yüksek 5 Hissesi (Tüm 42+ BIST &amp; XKTUM Evreni Otomatik Tarama Sonucu)</span>
+          <span>🎯 Günün Getiri İhtimali En Yüksek 5 Hissesi (BIST 100+ Canlı Tarama)</span>
           <span class="badge badge-emerald" id="ilk5EvrenRozet" style="margin-left:6px;">🕌 XKTUM Katılım İlk 5</span>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
@@ -422,43 +406,35 @@
             <option value="KATILIM" selected>🕌 Sadece XKTUM (Katılım Uyumlu) İlk 5</option>
             <option value="TUM_BIST">🌐 Tüm BIST Evreni İlk 5</option>
           </select>
-          <button class="btn btn-amber" onclick="ilk5OneriyiSesliOku()" title="Günün getiri ihtimali en yüksek 5 hissesini ve gerekçelerini Türkçe sesli okur">
-            🔊 İlk 5 Öneriyi Sesli Dinle
-          </button>
-          <button class="btn btn-emerald" onclick="ilk5HisseyiSenaryoyaUygula()" title="Günün en yüksek ihtimalli 5 hissesini seçili senaryoya (veya Senaryo 4'e) tek tıkla kurar">
-            🚀 Bu 5 Hisseyi Aktif Senaryoma Uygula
+          <button class="btn btn-emerald" onclick="ilk5HisseyiSenaryoyaUygula()" title="Günün en yüksek ihtimalli 5 hissesini seçili portföye tek tıkla kurar">
+            🚀 Bu 5 Hisseyi Portföyüme Uygula
           </button>
         </div>
       </div>
       <div id="gununIlk5Konteyner" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap:10px;"></div>
     </section>
 
-    <!-- 2C. KAP / İŞ YATIRIM BİLANÇO RÖNTGENİ & BİLANÇO-TEMETTÜ TAKVİMİ (İLK 5 ÖNERİ + AKTİF PORTFÖYÜM) -->
-    <section class="panel" id="sec_TAKVIM" style="margin-bottom:16px; border-color: rgba(56,189,248,0.4); background: linear-gradient(180deg, rgba(56,189,248,0.05), var(--bg-card));">
+    <!-- 2C. BİLANÇO & TEMETTÜ TAKVİMİ -->
+    <section class="panel sec-hidden" id="sec_TAKVIM" style="margin-bottom:14px; border-color: rgba(56,189,248,0.4); background: linear-gradient(180deg, rgba(56,189,248,0.05), var(--bg-card));">
       <div class="section-title" style="margin-bottom:10px;">
         <div>
-          <span>📅 KAP / İş Yatırım Bilanço &amp; Temettü Takvimi + Temettü Düzeltmeli Stop Kalkanı</span>
-          <span class="badge badge-sky" style="margin-left:6px;">Önerilen İlk 5 + Seçili Portföyüm</span>
+          <span>📅 Bilanço &amp; Temettü Takvimi + Temettü Korumalı Stop</span>
+          <span class="badge badge-sky" style="margin-left:6px;">İlk 5 + Aktif Portföyüm</span>
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-          <span class="badge badge-violet">📊 Kaynak: KAP TMS-29 &amp; Analitik Bilanço/Takvim Projeksiyonu (Tahmini)</span>
-          <button class="btn btn-amber" onclick="bilancoTakviminiSesliOku()" title="Portföyünüzdeki ve Günün İlk 5 listesindeki hisselerin yaklaşan bilanço ve temettü tarihlerini Türkçe sesli okur">
-            🔊 Bilanço &amp; Temettü Takvimini Sesli Dinle
-          </button>
-        </div>
+        <span class="badge badge-violet">📊 TMS-29 &amp; Takvim Projeksiyonu (%15 Stopaj)</span>
       </div>
       <div class="table-wrap">
         <table id="bilancoTakvimTabloEl">
           <thead>
             <tr>
-              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 0, 'metin')" title="A→Z / Z→A Sırala">Hisse &amp; Grup <span class="sort-ind">⇅</span></th>
-              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 1, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">Son Bilanço &amp; Özsermaye / Net Kâr <span class="sort-ind">⇅</span></th>
-              <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 2, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">Cari Oran / FAVÖK Marjı <span class="sort-ind">⇅</span></th>
-              <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 3, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">Piotroski F-Skor (9 Kriter) <span class="sort-ind">⇅</span></th>
-              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 4, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">📅 2026/09 (3Ç) Bilanço Tarihi &amp; Beklenti <span class="sort-ind">⇅</span></th>
-              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 5, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">💰 Temettü Tarihi &amp; Pay Başı Net TL <span class="sort-ind">⇅</span></th>
-              <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 6, 'sayi')" title="Küçük→Büyük / Büyük→Küçük Sırala">🛡️ Normal Stop / Temettü Düzeltmeli Stop <span class="sort-ind">⇅</span></th>
-              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 7, 'metin')" title="A→Z / Z→A Sırala">Canlı Emir Sinyali <span class="sort-ind">⇅</span></th>
+              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 0, 'metin')">Hisse &amp; Grup <span class="sort-ind">⇅</span></th>
+              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 1, 'sayi')">Son Bilanço &amp; Özsermaye / Net Kâr <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 2, 'sayi')">Cari Oran / FAVÖK Marjı <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 3, 'sayi')">Piotroski F-Skor <span class="sort-ind">⇅</span></th>
+              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 4, 'sayi')">📅 3Ç Bilanço Tarihi <span class="sort-ind">⇅</span></th>
+              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 5, 'sayi')">💰 Temettü &amp; Net TL <span class="sort-ind">⇅</span></th>
+              <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 6, 'sayi')">🛡️ Stop / Temettü Korumalı <span class="sort-ind">⇅</span></th>
+              <th class="sortable-th" onclick="genelTabloSutunSirala(this, 7, 'metin')">Detay <span class="sort-ind">⇅</span></th>
             </tr>
           </thead>
           <tbody id="bilancoTemettuTakvimiTablo"></tbody>
@@ -466,47 +442,53 @@
       </div>
     </section>
 
-    <!-- 3. 4 PARALEL SANAL SENARYO YARIŞ TABLOSU -->
-    <div class="section-title" id="sec_SENARYO_BASLIK">
-      <span>🧪 Çoklu Sanal Senaryo Laboratuvarı (4 Bağımsız Portföy — Filtre Değişimi Geçmişi Asla Silmez)</span>
+    <!-- 3. 4 PARALEL SANAL SENARYO KARTLARI (SADECE SENARYO / TÜMÜ SEKMESİNDE AÇIK, PORTFÖYDE KOMPAKT SEÇİCİ) -->
+    <div class="section-title sec-hidden" id="sec_SENARYO_BASLIK">
+      <span>🧪 4 Portföy Senaryosu ( Üzerine Tıklayarak Aktif Portföyü Seçin )</span>
       <div style="display:flex; gap:8px; align-items:center; font-size:12px; flex-wrap:wrap;">
-        <span class="badge badge-emerald">📈 Benchmark XKTUM: <strong id="benchXktum">+%3,40</strong></span>
-        <span class="badge badge-sky">📊 Benchmark XU100: <strong id="benchXu100">+%2,85</strong></span>
-        <span class="badge badge-amber">🏦 Kira Sertifikası / TLREF: <strong id="benchRf">+%0,10 (1G)</strong></span>
+        <span class="badge badge-emerald">📈 XKTUM: <strong id="benchXktum">+%3,40</strong></span>
+        <span class="badge badge-sky">📊 XU100: <strong id="benchXu100">+%2,85</strong></span>
+        <span class="badge badge-amber">🏦 Kira Sertifikası: <strong id="benchRf">+%0,10 (1G)</strong></span>
       </div>
     </div>
 
-    <section class="scenarios-grid" id="senaryoKartlariKonteyner"></section>
+    <section class="scenarios-grid sec-hidden" id="senaryoKartlariKonteyner"></section>
 
-    <!-- 3B. BLOOMBERG COMP FORMATINDA CANLI SVG KARŞILAŞTIRMALI GETİRİ EĞRİSİ (EQUITY CURVE) -->
-    <section class="panel" id="sec_EQUITY" style="margin-bottom:16px; padding:12px 16px;">
+    <!-- 3B. CANLI SVG PERFORMANS EĞRİSİ -->
+    <section class="panel sec-hidden" id="sec_EQUITY" style="margin-bottom:14px; padding:12px 16px;">
       <div class="section-title" style="margin-bottom:6px; font-size:13px;">
-        <span>📈 4 Senaryo &amp; XKTUM Benchmark Karşılaştırmalı Performans Eğrisi (Baz 10.000 TL Canlı Equity Curve)</span>
+        <span>📈 4 Senaryo &amp; XKTUM Karşılaştırmalı Getiri Grafiği (Baz 10.000 TL)</span>
         <div style="display:flex; gap:10px; font-size:11.5px; flex-wrap:wrap;">
           <span style="color:#10b981; font-weight:700;">● S1 (Katılım HRP)</span>
           <span style="color:#38bdf8; font-weight:700;">● S2 (%40-%35-%25)</span>
           <span style="color:#f59e0b; font-weight:700;">● S3 (Momentum ERC)</span>
-          <span style="color:#a855f7; font-weight:700;">● S4 (Co-Pilot Özel)</span>
-          <span style="color:#94a3b8; font-weight:700;">--- XKTUM Benchmark</span>
+          <span style="color:#a855f7; font-weight:700;">● S4 (Kişisel / Özel)</span>
+          <span style="color:#94a3b8; font-weight:700;">--- XKTUM</span>
         </div>
       </div>
       <div id="equityCurveSvgKonteyner" style="width:100%; height:135px;"></div>
     </section>
 
-    <!-- 4. SEÇİLİ SENARYO DETAYI, SERMAYE SINIRLI AL-SAT MASASI, AKSİYON KARTLARI VE RİSK ANALİZİ -->
-    <section class="workspace-grid" id="sec_PORTFOY_DETAY">
+    <!-- 4. ANA EKRAN: SERMAYE SINIRLI AL-SAT MASASI VE AÇIK POZİSYONLARIM (SADE TEK SÜTUN AKIŞI) -->
+    <section id="sec_PORTFOY_DETAY" style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px;">
       <div class="panel">
-        <div class="section-title">
-          <div>
-            <span id="aktifSenaryoBaslik">Senaryo 1 Detayı</span>
-            <span class="badge badge-emerald" id="aktifSenaryoModEtiket" style="margin-left:6px;">OTOPİLOT</span>
+        <div class="section-title" style="margin-bottom:10px;">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span id="aktifSenaryoBaslik" style="font-size:15px; font-weight:800;">Portföyüm</span>
+            <span class="badge badge-emerald" id="aktifSenaryoModEtiket">OTOPİLOT</span>
+            <select id="hizliSenaryoSeciciSelect" onchange="aktifSenaryoDegistir(this.value)" style="padding:4px 8px; font-size:12px; border-radius:6px; background:var(--bg-card-alt); color:var(--text-main); border:1px solid var(--border);">
+              <option value="S1">Portföy 1: Katılım HRP</option>
+              <option value="S2">Portföy 2: Klasik %40-%35-%25</option>
+              <option value="S3">Portföy 3: Momentum ERC</option>
+              <option value="S4">Portföy 4: Kişisel / Özel Portföyüm</option>
+            </select>
           </div>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
             <button class="btn" onclick="aktifSenaryoModDegistir()">
-              🔄 Mod Değiştir (Otopilot ⇄ Co-Pilot)
+              🔄 Otopilot ⇄ Yarı-Otomatik
             </button>
             <button class="btn" onclick="aktifSenaryoyuYenidenDengele()">
-              ♻️ Bu Senaryoyu Yeniden Dengele
+              ♻️ Sepeti Yeniden Dengele
             </button>
           </div>
         </div>
@@ -514,7 +496,7 @@
         <!-- SERMAYE SINIRLI GÜN İÇİ "ŞU KADAR LOT ŞUNU AL" REÇETESİ VE CANLI AL-SAT İŞLEM MASASI -->
         <div id="sermayeliAlSatMasasiAlan" style="margin-bottom:12px;"></div>
 
-        <!-- Yarı Otomatik (Co-Pilot) Toplu & Tekil Uyarı Kartları -->
+        <!-- Yarı Otomatik (Co-Pilot) Toplu & Tekil AL/SAT Uyarı Kartları -->
         <div id="copilotUyariAlani"></div>
 
         <!-- Portföy Ağırlık Çubuğu -->
@@ -525,15 +507,15 @@
           <table id="aktifPozisyonTabloEl">
             <thead>
               <tr>
-                <th class="sortable-th" onclick="genelTabloSutunSirala(this, 0, 'metin')" title="A→Z / Z→A Sırala">Hisse &amp; Sektör <span class="sort-ind">⇅</span></th>
-                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 1, 'sayi')" title="Lot Sayısına Göre Sırala">Lot <span class="sort-ind">⇅</span></th>
-                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 2, 'sayi')" title="Maliyete Göre Sırala">Maliyet (Kom. Dahil) <span class="sort-ind">⇅</span></th>
-                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 3, 'sayi')" title="Güncel Fiyata Göre Sırala">Güncel Fiyat <span class="sort-ind">⇅</span></th>
-                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 4, 'sayi')" title="Stop/Hedef Değerine Göre Sırala">Stop ───●─── Hedef Mesafesi <span class="sort-ind">⇅</span></th>
-                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 5, 'sayi')" title="Ağırlığa Göre Sırala">Ağırlık (Hedef/Gerçek) <span class="sort-ind">⇅</span></th>
-                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 6, 'sayi')" title="Kâr/Zarara Göre Sırala">Net K/Z (TL &amp; %) <span class="sort-ind">⇅</span></th>
-                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 7, 'sayi')" title="TKBB Arındırma Tutarına Göre Sırala">TKBB 3.6.1 Arındırma <span class="sort-ind">⇅</span></th>
-                <th>Hızlı Al / Sat İşlem</th>
+                <th class="sortable-th" onclick="genelTabloSutunSirala(this, 0, 'metin')">Hisse &amp; Sektör <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 1, 'sayi')">Lot <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 2, 'sayi')">Maliyet <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 3, 'sayi')">Güncel Fiyat <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 4, 'sayi')">Stop ───●─── Hedef <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 5, 'sayi')">Ağırlık <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 6, 'sayi')">Net K/Z <span class="sort-ind">⇅</span></th>
+                <th class="num sortable-th" onclick="genelTabloSutunSirala(this, 7, 'sayi')">Arındırma <span class="sort-ind">⇅</span></th>
+                <th>Hızlı Al / Sat</th>
               </tr>
             </thead>
             <tbody id="aktifSenaryoPozisyonTablo"></tbody>
@@ -541,81 +523,87 @@
         </div>
       </div>
 
-      <!-- Sağ Panel: Kovaryans Risk Yönetimi, Stres Testi, TKBB Kalıcı Arındırma ve İşlem Defteri -->
-      <div class="panel" style="display:flex; flex-direction:column; gap:14px;">
-        <div>
-          <div class="section-title">
-            <span>🛡️ Kovaryans Risk, VaR/CVaR &amp; TKBB 3.6.1 Özeti</span>
-            <span class="badge badge-violet" id="efektifHisseSayisiEtiket">Efektif Hisse: --</span>
+      <!-- İKİNCİL PANEL: RİSK, STRES TESTİ VE İŞLEM DEFTERİ (EKRAN KARMAŞASINI ÖNLEMEK İÇİN AÇILIR/KAPANIR KUTU) -->
+      <details class="panel" style="padding:10px 14px;">
+        <summary style="cursor:pointer; font-weight:700; color:var(--accent); font-size:13px; display:flex; justify-content:space-between; align-items:center;">
+          <span>🛡️ Detaylı Risk, Stres Testi, TKBB Arındırma ve İşlem Geçmişini Göster / Gizle</span>
+          <span class="badge badge-violet" id="efektifHisseSayisiEtiket">Efektif Hisse: --</span>
+        </summary>
+        <div style="display:flex; flex-direction:column; gap:14px; margin-top:12px;">
+          <div class="scen-kpis" id="riskMetrikleriKutu" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));"></div>
+          <div>
+            <div class="section-title" style="font-size:12.5px;">
+              <span>🌪️ Makro Stres Testi</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Stres Senaryosu</th>
+                    <th class="num">Tahmini Portföy Etkisi</th>
+                    <th>Koruma Kalkanı</th>
+                  </tr>
+                </thead>
+                <tbody id="stresTestiTablo"></tbody>
+              </table>
+            </div>
           </div>
-          <div class="scen-kpis" id="riskMetrikleriKutu" style="grid-template-columns: repeat(2, 1fr);"></div>
+          <div>
+            <div class="section-title" style="font-size:12.5px;">
+              <span>📜 İşlem &amp; Denetim Defteri</span>
+              <span style="font-size:11px; color:var(--text-muted);" id="simGunSayaci">Simülasyon Günü: 1</span>
+            </div>
+            <div class="audit-list" id="islemGunluguKonteyner"></div>
+          </div>
         </div>
-
-        <div>
-          <div class="section-title" style="font-size:13px;">
-            <span>🌪️ Makro Stres Testi &amp; Kuyruk Riski (Korelasyonlu %95 CVaR)</span>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Stres Senaryosu</th>
-                  <th class="num">Tahmini Portföy Etkisi</th>
-                  <th>Koruma Kalkanı</th>
-                </tr>
-              </thead>
-              <tbody id="stresTestiTablo"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div>
-          <div class="section-title" style="font-size:13px;">
-            <span>📜 Silinmeyen İşlem &amp; Denetim Defteri (Audit Log)</span>
-            <span style="font-size:11px; color:var(--text-muted);" id="simGunSayaci">Simülasyon Günü: 1</span>
-          </div>
-          <div class="audit-list" id="islemGunluguKonteyner"></div>
-        </div>
-      </div>
+      </details>
     </section>
 
-    <!-- 5. ÇOK FAKTÖRLÜ BIST & XKTUM TARAYICI + VALUE TRAP VETO RADARI -->
-    <section class="panel" id="sec_TARAYICI">
-      <div class="section-title">
-        <span>🔍 Çok Faktörlü BIST Tarayıcı (<strong id="toplamEvrenSayac">42 Hisse</strong> — 550+ BIST Hissesine Açık), Dinamik Sektör Medyanları &amp; Value Trap Veto Kapısı</span>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-          <input type="text" id="hizliBistKodInput" class="input" style="min-width:190px; padding:6px 10px;" placeholder="BIST Kodu Yaz (Örn: ULKER, TCELL)" onkeydown="if(event.key==='Enter')otomatikBistKoduCek()" />
-          <button class="btn btn-emerald" onclick="otomatikBistKoduCek()" title="BIST'teki 550+ hisseden herhangi birinin kodunu yazın; fiyat, RSI ve çarpanlarını otomatik çeker">⚡ Kodu Otomatik Çek</button>
-          <button class="btn btn-amber" onclick="tumBist100CanliYukle()" title="TradingView Borsa İstanbul canlı tarayıcısından piyasa değeri en yüksek 100+ BIST hissesini tek tıkla canlı çeker">🚀 BIST 100 / Tüm BIST Canlı Çek (100+ Hisse)</button>
-          <button class="btn btn-primary" onclick="genisBistHavuzunuYukle()" title="Tek tıkla BIST 100 & XKTUM içinden +15 büyük hisseyi evrene ekler">🌐 Geniş Paket (+15 Hisse)</button>
-          <button class="btn" onclick="manuelHisseModalAc()">➕ Bilançolu Manuel Ekle</button>
-          <button class="btn" onclick="bestAiDenetimModalAc()">🏆 5 AI + 2 Ajan Kalkanı</button>
+    <!-- 5. SADELEŞTİRİLMİŞ TEK KUTULU HİSSE ARAMA & BIST 100+ TARAYICI -->
+    <section class="panel sec-hidden" id="sec_TARAYICI">
+      <div class="section-title" style="margin-bottom:10px;">
+        <span>🔍 BIST Hisse Arama &amp; Adil Değer Tarayıcı (<strong id="toplamEvrenSayac">BIST 100+ Hisse</strong>)</span>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+          <button class="btn btn-amber" onclick="tumBist100CanliYukle(false)" title="TradingView Borsa İstanbul canlı tarayıcısından 150+ BIST hissesini tek tıkla yeniler">🚀 Tüm BIST 100+ Canlı Yenile</button>
+          <button class="btn" onclick="sadeTabloToggle()" title="Tabloda 8 sade sütun veya 14 detaylı sütun göster">👁️ Sütun Görünümü</button>
         </div>
       </div>
 
-      <div class="filter-bar">
-        <input type="text" id="aramaInput" class="input" placeholder="Hisse kodu veya adı ara (Örn: TUPRS, BIMAS)..." oninput="tabloyuFiltrele()" />
-        <select id="katilimFiltreSelect" onchange="tabloyuFiltrele()">
-          <option value="TUMU">Katılım Filtresi: Tüm Evren (XKTUM + Diğer)</option>
-          <option value="SADECE_UYGUN">🕌 Sadece XKTUM Tam Uyumlu (&lt;%33 Borç/Varlık)</option>
-          <option value="UYGUN_VE_SINIRDA">⚠️ XKTUM Uyumlu + Sınırda Olanlar (%28-%33)</option>
-        </select>
-        <select id="sektorFiltreSelect" onchange="tabloyuFiltrele()">
-          <option value="TUMU">Alt Sektör: Tüm Sektörler (Canlı Medyanlı)</option>
-          <option value="DEMIR_CELIK">Demir Çelik &amp; Ağır Sanayi</option>
-          <option value="OTOMOTIV">Otomotiv &amp; Yan Sanayi</option>
-          <option value="ENERJI_RAFINERI">Enerji &amp; Rafineri</option>
-          <option value="GIDA_PERAKENDE">Gıda &amp; Perakende</option>
-          <option value="TEKNOLOJI_SAVUNMA">Teknoloji &amp; Savunma</option>
-          <option value="ULASTIRMA_LOJISTIK">Ulaştırma &amp; Lojistik</option>
-          <option value="CAM_KIMYA_MADEN">Cam, Kimya &amp; Maden</option>
-        </select>
-        <select id="vetoFiltreSelect" onchange="tabloyuFiltrele()">
-          <option value="TUMU">Uygunluk Kapısı: Tüm Adaylar (Veto Dahil)</option>
-          <option value="SADECE_GECENLER">✅ Sadece Veto Kapısını Geçen Sağlam Adaylar</option>
-          <option value="SADECE_VETOLULAR">🚫 Value Trap / Borç / Negatif F/K Vetosu Yiyenler</option>
-        </select>
+      <!-- TEK AKILLI ARAMA VE CANLI ÇEKİM ÇUBUĞU (KARSN DAHİL 550+ BIST HİSSESİNİ SUNUCUSUZ BULUR) -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+        <input type="text" id="aramaInput" class="input" style="flex:1; min-width:210px; font-size:14px; padding:9px 12px; border-color:var(--accent);" placeholder="🔍 Hisse kodu veya adı yazın (Örn: KARSN, Karsan, THYAO, TUPRS)..." oninput="hizliAramaVeCanliBul(this.value)" onkeydown="if(event.key==='Enter')otomatikBistKoduCek(this.value)" />
+        <input type="hidden" id="hizliBistKodInput" />
+        <button class="btn btn-emerald" style="padding:8px 14px; font-weight:700;" onclick="otomatikBistKoduCek(document.getElementById('aramaInput').value)" title="Yazdığınız hisseyi Borsa İstanbul'dan anında canlı çeker">⚡ BIST'ten Canlı Getir</button>
       </div>
+
+      <!-- KATLANABİLİR FİLTRELER (MOBİLDE EKRANI KAPLAMAMASI İÇİN) -->
+      <details style="margin-bottom:10px; background:var(--bg-card-alt); padding:8px 12px; border-radius:8px; border:1px solid var(--border);">
+        <summary style="cursor:pointer; font-size:12px; font-weight:700; color:var(--text-muted);">⚙️ Filtreler (Katılım, Sektör, Veto) &amp; Manuel Hisse Ekle ▾</summary>
+        <div class="filter-bar" style="margin-top:8px; margin-bottom:0;">
+          <select id="katilimFiltreSelect" onchange="tabloyuFiltrele()">
+            <option value="TUMU">Katılım Filtresi: Tüm Evren (XKTUM + Diğer)</option>
+            <option value="SADECE_UYGUN">🕌 Sadece XKTUM Tam Uyumlu (&lt;%33 Borç/Varlık)</option>
+            <option value="UYGUN_VE_SINIRDA">⚠️ XKTUM Uyumlu + Sınırda Olanlar (%28-%33)</option>
+          </select>
+          <select id="sektorFiltreSelect" onchange="tabloyuFiltrele()">
+            <option value="TUMU">Alt Sektör: Tüm Sektörler</option>
+            <option value="DEMIR_CELIK">Demir Çelik &amp; Ağır Sanayi</option>
+            <option value="OTOMOTIV">Otomotiv &amp; Yan Sanayi</option>
+            <option value="ENERJI_RAFINERI">Enerji &amp; Rafineri</option>
+            <option value="GIDA_PERAKENDE">Gıda &amp; Perakende</option>
+            <option value="TEKNOLOJI_SAVUNMA">Teknoloji &amp; Savunma</option>
+            <option value="ULASTIRMA_LOJISTIK">Ulaştırma &amp; Lojistik</option>
+            <option value="CAM_KIMYA_MADEN">Cam, Kimya &amp; Maden</option>
+          </select>
+          <select id="vetoFiltreSelect" onchange="tabloyuFiltrele()">
+            <option value="TUMU">Uygunluk: Tüm Hisseler</option>
+            <option value="SADECE_GECENLER">✅ Sadece Veto Kapısını Geçen Adaylar</option>
+            <option value="SADECE_VETOLULAR">🚫 Veto Yiyenler</option>
+          </select>
+          <button class="btn" onclick="manuelHisseModalAc()">➕ Bilançolu Manuel Ekle</button>
+          <button class="btn" onclick="bestAiDenetimModalAc()">🏆 Denetim Kalkanı</button>
+        </div>
+      </details>
 
       <div class="table-wrap">
         <table id="bistTarayiciTablo">
@@ -836,25 +824,52 @@
       </div>
 
       <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-        <button class="btn btn-amber" onclick="sesliKonus('Sesli uyarı asistanınız aktif. Portföyünüzdeki hisseler hedefe veya stop seviyesine ulaştığında size Türkçe sesli bilgi vereceğim.', true)">🔊 Sesli Uyarıyı Şimdi Test Et</button>
-        <button class="btn btn-emerald" onclick="kisiselPortfoyuKaydetVeBaslat()">🚀 Kişisel Portföyümü Kaydet &amp; Sesli Takibi Başlat</button>
+        <button class="btn btn-amber" onclick="zilSesiCal('al'); toastGoster('🔔 Emir Zili Testi', 'AL veya SAT emri oluştuğunda bu küçük zil sesi çalar.', 'info');">🔔 Emir Zil Sesini Test Et</button>
+        <button class="btn btn-emerald" onclick="kisiselPortfoyuKaydetVeBaslat()">🚀 Kişisel Portföyümü Kaydet &amp; Başlat</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 6: KURUMSAL GÜN SONU Z-RAPORU (EOD EXECUTIVE SUMMARY & SESLİ BRİFİNG) -->
+  <!-- MODAL 6: KURUMSAL GÜN SONU Z-RAPORU (SADECE YAZILI RAPOR) -->
   <div class="modal-backdrop" id="gunSonuRaporModal" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="modal" style="max-width:980px;">
       <div class="modal-header">
-        <h3 id="gunSonuRaporBaslik">📊 BIST Hibrit v4.3 — Gün Sonu Z-Raporu &amp; Ertesi Gün Emir Planı</h3>
+        <h3 id="gunSonuRaporBaslik">📊 Gün Sonu Z-Raporu &amp; Ertesi Gün Emir Planı</h3>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-amber" onclick="gunSonuRaporunuSesliOku()">🔊 Gün Sonu Raporunu Sesli Dinle</button>
           <button class="btn btn-emerald" onclick="gunSonuRaporuIndir()">📄 Raporu İndir (.HTML)</button>
           <button class="btn btn-primary" onclick="window.print()">🖨️ Yazdır / PDF</button>
           <button class="btn" onclick="document.getElementById('gunSonuRaporModal').classList.remove('open')">✖ Kapat</button>
         </div>
       </div>
       <div id="gunSonuRaporIcerik"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: TELEFONA YÜKLEME & "ZATEN YÜKLÜ" HATASI ÇÖZÜM KILAVUZU -->
+  <div class="modal-backdrop" id="pwaKurulumYardimModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal" style="max-width:540px;">
+      <div class="modal-header">
+        <h3>📲 Telefona Yükleme &amp; "Zaten Yüklü" Çözümü</h3>
+        <button class="btn" onclick="document.getElementById('pwaKurulumYardimModal').classList.remove('open')">✖ Kapat</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px; font-size:13px; line-height:1.55;">
+        <div class="panel" style="padding:12px; border-color:rgba(16,185,129,0.45); background:rgba(16,185,129,0.08);">
+          <strong>✅ Çözüm 1 (Tek Tıkla Yeni Kimlikle Kurulum):</strong><br/>
+          Telefonunuz eski sürümü "Zaten yüklü" sanıyorsa aşağıdaki yeşil butona basın. Eski önbellek temizlenir ve yeni uygulama kimliği (<code>v4.8</code>) ile yükleme açılır:
+          <div style="margin-top:10px;">
+            <button class="btn btn-emerald" style="width:100%; justify-content:center; padding:10px;" onclick="pwaHayaletKaydiSifirla()">
+              🔄 Eski Kaydı Temizle ve Yeni Sürümü Yükle
+            </button>
+          </div>
+        </div>
+        <div class="panel" style="padding:12px;">
+          <strong>📱 Çözüm 2 (Android "Zaten Yüklü" Hayalet Kaydını Silme):</strong><br/>
+          1. Telefonunuzun <strong>Ayarlar → Uygulamalar (Apps)</strong> menüsünü açın.<br/>
+          2. Arama kutusuna <strong><code>BIST</code></strong> veya <strong><code>Borsa</code></strong> yazın.<br/>
+          3. Görünmeyen eski kalıntı uygulamaya dokunup <strong>Kaldır (Uninstall)</strong> deyin.<br/>
+          4. Ardından Chrome sağ üst <strong>⋮ (Üç Nokta) → Ana ekrana ekle / Uygulamayı yükle</strong> seçeneğine dokunun.
+        </div>
+      </div>
     </div>
   </div>
   <script>
@@ -1752,6 +1767,8 @@
         document.getElementById("guncellemeZamaniEtiket").textContent = `⏱️ Snapshot: Canlı BIST & KAP TMS 29 Düzeltmeli`;
       }
       await tarayicidanCanliBistAkisiCek();
+      // Açılışta BIST 100+ tüm popüler hisseleri (KARSN vb.) sessizce otomatik yükle
+      await tumBist100CanliYukle(true);
       STATE.canliOtoSayacSn = 15;
       senaryolariKaliciKaydet();
       ekraniCiz();
@@ -1855,7 +1872,15 @@
       kayitliTabloSiralamalariniUygula();
       const tabTarayici = document.getElementById("tabBtn_TARAYICI");
       if (tabTarayici && STATE.hisseler) {
-        tabTarayici.textContent = `🔍 5. Hisse Tarayıcı & Adil Değer (${STATE.hisseler.length} Hisse)`;
+        tabTarayici.textContent = `🔍 2. Hisse Ara (${STATE.hisseler.length} BIST Hisse)`;
+      }
+      const evrenSayac = document.getElementById("toplamEvrenSayac");
+      if (evrenSayac && STATE.hisseler) {
+        evrenSayac.textContent = `${STATE.hisseler.length} BIST Hissesi`;
+      }
+      const hizliSec = document.getElementById("hizliSenaryoSeciciSelect");
+      if (hizliSec && STATE.aktifSenaryoId) {
+        hizliSec.value = STATE.aktifSenaryoId;
       }
     }
 
@@ -1871,17 +1896,14 @@
       const h2 = ilk5[1];
       const h3 = ilk5[2];
 
-      let sesliMetin = `${selam} ${bugun} Borsa İstanbul sabah açılış ve günlük öneri brifinginiz hazır. `;
+      let sesliMetin = `${selam} ${bugun} BIST 100+ canlı tarama özeti: `;
       if (h1 && h2) {
         const lot1 = Math.max(1, Math.floor(2500 / Math.max(0.01, h1.bazFiyat)));
-        sesliMetin += `Bugün taranan ${STATE.hisseler.length} hisse içinde getiri ihtimali en yüksek 1 numaralı öneri yüzde ${h1.getiriIhtimaliPct} ihtimal ile ${h1.ad} (${h1.kod}); alım fiyatı ${h1.bazFiyat.toFixed(2)} lira, 2500 liralık dilim için ${lot1} lot, iz süren stop ${h1.chandelierStop.toFixed(2)} lira, 30 günlük hedef ${h1.aylikHedefFiyat.toFixed(2)} lira. `;
-        sesliMetin += `2 numaralı öneri yüzde ${h2.getiriIhtimaliPct} ihtimal ile ${h2.ad} (${h2.kod}), hedef ${h2.aylikHedefFiyat.toFixed(2)} lira. `;
-        if (h3) sesliMetin += `3 numaralı öneri yüzde ${h3.getiriIhtimaliPct} ihtimal ile ${h3.ad}. `;
+        sesliMetin += `1. AL Adayı ${h1.kod} (${h1.bazFiyat.toFixed(2)}₺, ${lot1} lot, Stop ${h1.chandelierStop.toFixed(2)}₺, Hedef ${h1.aylikHedefFiyat.toFixed(2)}₺). `;
+        sesliMetin += `2. AL Adayı ${h2.kod} (Hedef ${h2.aylikHedefFiyat.toFixed(2)}₺). `;
       }
       if (satEmirleri.length > 0) {
-        sesliMetin += `Kişisel portföyünüzde bugün dikkat etmeniz gereken ${satEmirleri.length} adet satış veya ikame sinyali bulunuyor: ${satEmirleri[0].sesMetni}`;
-      } else if (alEmirleri.length > 0) {
-        sesliMetin += `Portföyünüzdeki mevcut hisseler güvenli bantta. Yeni alım için: ${alEmirleri[0].sesMetni}`;
+        sesliMetin += `Portföyde ${satEmirleri.length} adet SAT sinyali mevcut.`;
       }
 
       return { bugun, selam, ilk5, sc, satEmirleri, alEmirleri, sesliMetin };
@@ -1899,55 +1921,30 @@
         <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
           <div>
             <div style="font-weight:800; font-size:13.5px; color:var(--amber); display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-              <span>☀️ Günlük Sabah Seans Açılış Brifingi &amp; Günün Hazır AL/SAT Önerileri (${escHtml(b.bugun)})</span>
-              <span class="badge badge-emerald">⏰ Her Sabah 09:35 &amp; 10:00 Otomatik Yenilenir</span>
+              <span>☀️ Günün Hazır AL/SAT Önerileri (${escHtml(b.bugun)})</span>
+              <span class="badge badge-emerald">BIST 100+ Canlı Tarama</span>
             </div>
             <div style="font-size:12px; color:var(--text-main); margin-top:5px; line-height:1.5;">
-              ${h1 ? `🥇 <strong>1. AL Önerisi: ${escHtml(h1.kod)}</strong> (%${sayiFormat(h1.getiriIhtimaliPct, 1)} İhtimal · Alım: <strong>${tlFormat(h1.bazFiyat)}</strong> · Stop: <span class="neg">${tlFormat(h1.chandelierStop)}</span> · Hedef: <span class="pos">${tlFormat(h1.aylikHedefFiyat)}</span>)` : ""}
-              ${h2 ? ` &nbsp;|&nbsp; 🥈 <strong>2. AL Önerisi: ${escHtml(h2.kod)}</strong> (%${sayiFormat(h2.getiriIhtimaliPct, 1)} İhtimal · Hedef: <span class="pos">${tlFormat(h2.aylikHedefFiyat)}</span>)` : ""}
-              ${h3 ? ` &nbsp;|&nbsp; 🥉 <strong>3. AL Önerisi: ${escHtml(h3.kod)}</strong> (%${sayiFormat(h3.getiriIhtimaliPct, 1)} İhtimal · Hedef: <span class="pos">${tlFormat(h3.aylikHedefFiyat)}</span>)` : ""}
+              ${h1 ? `🥇 <strong>1. AL: ${escHtml(h1.kod)}</strong> (%${sayiFormat(h1.getiriIhtimaliPct, 1)} · <strong>${tlFormat(h1.bazFiyat)}</strong> · Stop: <span class="neg">${tlFormat(h1.chandelierStop)}</span> · Hedef: <span class="pos">${tlFormat(h1.aylikHedefFiyat)}</span>)` : ""}
+              ${h2 ? ` &nbsp;|&nbsp; 🥈 <strong>2. AL: ${escHtml(h2.kod)}</strong> (%${sayiFormat(h2.getiriIhtimaliPct, 1)} · Hedef: <span class="pos">${tlFormat(h2.aylikHedefFiyat)}</span>)` : ""}
+              ${h3 ? ` &nbsp;|&nbsp; 🥉 <strong>3. AL: ${escHtml(h3.kod)}</strong> (%${sayiFormat(h3.getiriIhtimaliPct, 1)} · Hedef: <span class="pos">${tlFormat(h3.aylikHedefFiyat)}</span>)` : ""}
             </div>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn btn-amber" onclick="sabahBrifingiSesliVeGorselAc(true)">🔊 Sabah Önerilerini Sesli Dinle</button>
-            <button class="btn btn-emerald" onclick="ilk5HisseyiSenaryoyaUygula()">🚀 Sabah Önerilerini Portföye Uygula</button>
+            <button class="btn btn-emerald" onclick="ilk5HisseyiSenaryoyaUygula()">🚀 Bu Önerileri Portföye Uygula</button>
           </div>
         </div>
       `;
     }
 
-    function sabahBrifingiSesliVeGorselAc(zorla = true) {
+    function sabahBrifingiSesliVeGorselAc() {
       const b = sabahBrifingMetniUret();
-      const bugunIso = new Date().toISOString().slice(0, 10);
-      localStorage.setItem("bist_son_sabah_brifing_tarihi", bugunIso);
-      sesliKonus(b.sesliMetin, zorla, "bilgi");
-      toastGoster("☀️ Sabah Açılış Brifingi & Günün Önerileri", b.sesliMetin, "success");
+      toastGoster("☀️ Günün AL/SAT Özeti", b.sesliMetin, "success");
     }
 
     function sabahVeKapanisZamanlayiciKontrolEt() {
-      const simdi = new Date();
-      const bugunIso = simdi.toISOString().slice(0, 10);
-      const saat = simdi.getHours();
-      const dk = simdi.getMinutes();
-
-      // 1. O gün ilk kez uygulama açıldığında (veya sabah 09:55 / 10:00 seans açılışında) otomatik sabah önerisi ver
-      const sonSabah = localStorage.getItem("bist_son_sabah_brifing_tarihi");
-      if (sonSabah !== bugunIso && STATE.hisseler && STATE.hisseler.length > 0) {
-        localStorage.setItem("bist_son_sabah_brifing_tarihi", bugunIso);
-        setTimeout(() => {
-          const b = sabahBrifingMetniUret();
-          sesliKonus(b.sesliMetin, false, "bilgi");
-          toastGoster("☀️ Günün Sabah AL/SAT Önerileri Hazır!", b.sesliMetin, "success");
-        }, 1200);
-      }
-
-      // 2. Akşam 18:10 BIST kapanışında otomatik Gün Sonu Z-Raporu sesli özeti
-      const sonKapanis = localStorage.getItem("bist_son_kapanis_rapor_tarihi");
-      if (saat === 18 && dk >= 10 && dk <= 20 && sonKapanis !== bugunIso) {
-        localStorage.setItem("bist_son_kapanis_rapor_tarihi", bugunIso);
-        gunSonuRaporuAc();
-        gunSonuRaporunuSesliOku();
-      }
+      // Kullanıcı talebi: Günlük rapor ve sabah özeti sesli okunmaz, açılışta "42 hisse" bildirimi çıkarılmaz.
+      // Yalnızca AL veya SAT emri oluştuğunda küçük zil sesi (zilSesiCal) çalar.
     }
 
     function bilancoTakvimListesiniGetir() {
@@ -2128,7 +2125,7 @@
     }
 
     // =========================================================================
-    // TÜRKÇE SESLİ UYARI ASİSTANI (WEB SPEECH API tr-TR + WEB AUDIO ALARM + WAKE LOCK)
+    // KÜÇÜK ZİL UYARI SİSTEMİ (YALNIZCA AL / SAT EMRİ SİNYALİNDE ZİL SESİ ÇALAR)
     // =========================================================================
     async function ekranUyanikTutWakeLock() {
       try {
@@ -2138,43 +2135,60 @@
       } catch (_) {}
     }
 
-    function alarmSesiCal(tur = "bilgi") {
+    function zilSesiCal(tur = "al") {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
         const ctx = new AudioCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = tur === "tehlike" ? "sawtooth" : "sine";
         const now = ctx.currentTime;
-        osc.frequency.setValueAtTime(tur === "tehlike" ? 580 : 660, now);
-        osc.frequency.setValueAtTime(tur === "tehlike" ? 420 : 880, now + 0.14);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-        osc.start(now);
-        osc.stop(now + 0.36);
+
+        const calNota = (frekans, baslangicSn, sureSn, sesSeviyesi = 0.14) => {
+          const osc = ctx.createOscillator();
+          const harm = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          harm.type = "triangle";
+          osc.frequency.setValueAtTime(frekans, now + baslangicSn);
+          harm.frequency.setValueAtTime(frekans * 2.0, now + baslangicSn);
+
+          gain.gain.setValueAtTime(0.0001, now + baslangicSn);
+          gain.gain.linearRampToValueAtTime(sesSeviyesi, now + baslangicSn + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.0008, now + baslangicSn + sureSn);
+
+          osc.connect(gain);
+          harm.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now + baslangicSn);
+          harm.start(now + baslangicSn);
+          osc.stop(now + baslangicSn + sureSn + 0.02);
+          harm.stop(now + baslangicSn + sureSn + 0.02);
+        };
+
+        if (tur === "tehlike" || tur === "sat") {
+          // SAT / Stop zili: Ding-Dong (C6 -> G5)
+          calNota(1046.50, 0.00, 0.26, 0.15);
+          calNota(783.99, 0.13, 0.38, 0.15);
+        } else {
+          // AL / Fırsat zili: Kristal Çift Zil (B5 -> E6)
+          calNota(987.77, 0.00, 0.24, 0.14);
+          calNota(1318.51, 0.12, 0.40, 0.15);
+        }
       } catch (_) {}
     }
 
+    function alarmSesiCal(tur = "bilgi") {
+      zilSesiCal(tur === "tehlike" ? "sat" : "al");
+    }
+
     function sesliKonus(metin, zorla = false, alarmTuru = "bilgi") {
+      // Kullanıcı talebi: Günlük raporlar veya uzun metinler sesli okunmaz; yalnızca küçük zil sesi çalar.
+      try {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      } catch (_) {}
       if (!STATE.sesliUyariAktif && !zorla) return;
       ekranUyanikTutWakeLock();
-      alarmSesiCal(alarmTuru);
-      try {
-        if ("speechSynthesis" in window) {
-          window.speechSynthesis.cancel();
-          const u = new SpeechSynthesisUtterance(metin);
-          u.lang = "tr-TR";
-          u.rate = 1.02;
-          u.pitch = 1.0;
-          const sesler = window.speechSynthesis.getVoices() || [];
-          const trSes = sesler.find(v => v.lang && v.lang.toLowerCase().startsWith("tr"));
-          if (trSes) u.voice = trSes;
-          window.speechSynthesis.speak(u);
-        }
-      } catch (_) {}
+      zilSesiCal(alarmTuru === "tehlike" ? "sat" : "al");
     }
 
     function sesliUyariToggle() {
@@ -2182,18 +2196,18 @@
       const btn = document.getElementById("sesliUyariBtn");
       if (STATE.sesliUyariAktif) {
         if (btn) {
-          btn.textContent = "🔊 Sesli Uyarı: AÇIK";
+          btn.textContent = "🔔 Emir Zili: AÇIK";
           btn.className = "btn btn-amber";
         }
-        sesliKonus("Türkçe sesli portföy uyarı asistanı aktif edildi.", true);
-        toastGoster("Sesli Uyarı Asistanı Açık", "Portföyünüzdeki hisseler hedefe veya stop seviyesine geldiğinde Türkçe sesli uyarı verilecek.", "success");
+        zilSesiCal("al");
+        toastGoster("🔔 Emir Zili Açık", "Sadece AL veya SAT emri oluştuğunda küçük zil uyarı sesi çalacak (konuşma kapalı).", "success");
       } else {
         if ("speechSynthesis" in window) window.speechSynthesis.cancel();
         if (btn) {
-          btn.textContent = "🔇 Sesli Uyarı: KAPALI";
+          btn.textContent = "🔕 Emir Zili: KAPALI";
           btn.className = "btn";
         }
-        toastGoster("Sesli Uyarı Kapatıldı", "Sesli bildirimler sessize alındı.", "info");
+        toastGoster("🔕 Emir Zili Kapatıldı", "Zil bildirimleri sessize alındı.", "info");
       }
     }
 
@@ -2201,39 +2215,14 @@
       const sc = STATE.senaryolar[STATE.aktifSenaryoId];
       if (!sc) return;
       const netKZ = Number((sc.toplamPortfoyDegeriTL - sc.baslangicButceTL).toFixed(0));
-      const kzDurum = netKZ >= 0 ? `${netKZ} lira kârda` : `${Math.abs(netKZ)} lira zararda`;
-      const ilk5 = gununIlk5ListesiniHesapla();
-      const lider = ilk5[0];
-
-      const sinyaller = [];
-      sc.pozisyonlar.forEach(p => {
-        if (p.piyasaFiyati <= p.stopFiyati) {
-          sinyaller.push(`${p.ad} hissesi ${p.piyasaFiyati.toFixed(1)} lira ile stop seviyesini kırdı, acil kontrol edin`);
-        } else if (p.piyasaFiyati >= p.hedefFiyati) {
-          sinyaller.push(`${p.ad} hissesi ${p.piyasaFiyati.toFixed(1)} lira ile kâr al hedefine ulaştı`);
-        }
-      });
-
-      let mesaj = `${sc.ad} portföyünüzde ${sc.pozisyonlar.length} hisse bulunuyor. Toplam portföy değeriniz ${Math.round(sc.toplamPortfoyDegeriTL)} lira ve portföyünüz ${kzDurum}. `;
-      if (sinyaller.length > 0) {
-        mesaj += `Dikkat! Portföyünüzde ${sinyaller.length} aktif sinyal var: ${sinyaller.join(". ")}. `;
-      } else {
-        mesaj += `Portföyünüzdeki tüm hisseler güvenli bant içinde seyrediyor. `;
-      }
-      if (lider) {
-        mesaj += `Ayrıca bugün taranan ${STATE.hisseler.length} Borsa İstanbul hissesi içinde getiri ihtimali en yüksek birinci aday yüzde ${lider.getiriIhtimaliPct} ihtimal ile ${lider.ad}.`;
-      }
-      sesliKonus(mesaj, true);
-      toastGoster("🎙️ Sesli Portföy Özeti Okunuyor", mesaj, "info");
+      const kzDurum = netKZ >= 0 ? `+${netKZ} ₺ kârda` : `-${Math.abs(netKZ)} ₺ zararda`;
+      toastGoster("📊 Portföy Özeti", `${sc.ad}: Toplam ${Math.round(sc.toplamPortfoyDegeriTL)} ₺ (${kzDurum}).`, "info");
     }
 
     function ilk5OneriyiSesliOku() {
       const ilk5 = gununIlk5ListesiniHesapla();
       if (!ilk5.length) return;
-      const parcalar = ilk5.map((h, i) => `${i + 1}. sırada yüzde ${h.getiriIhtimaliPct} ihtimal ve yüzde ${h.aylikBeklentiPct.toFixed(1)} hedef potansiyel ile ${h.ad}`);
-      const metin = `Borsa İstanbul ${STATE.hisseler.length} hisse tam evren taraması sonucuna göre günün getiri ihtimali en yüksek ilk 5 hissesi: ${parcalar.join(". ")}.`;
-      sesliKonus(metin, true);
-      toastGoster("🔊 Günün İlk 5 Önerisi Sesli Okunuyor", metin, "success");
+      toastGoster("🎯 Günün İlk 5 Önerisi", ilk5.map((h, i) => `${i + 1}. ${h.kod} (${tlFormat(h.bazFiyat)})`).join(" · "), "success");
     }
 
     function ilk5HisseyiSenaryoyaUygula() {
@@ -2259,7 +2248,7 @@
       });
       senaryolariKaliciKaydet();
       ekraniCiz();
-      sesliKonus(`Günün getiri ihtimali en yüksek 5 hissesi ${sc.ad} portföyünüze başarıyla uygulandı.`, false);
+      zilSesiCal("al");
       toastGoster("İlk 5 Öneri Portföye Uygulandı", `${ilk5.map(x => x.kod).join(", ")} hisseleri ${sc.ad} içine dağıtıldı.`, "success");
     }
 
@@ -2382,33 +2371,21 @@
           }
         });
 
-        // 2. YENİ AL EMİRLERİ SESLİ UYARISI (Yarı Otomatik & Kişisel Portföyde Al Fırsatı Kaçırmamak İçin)
+        // 2. YENİ AL EMİRLERİ ZİL UYARISI (Yalnızca gerçek AL fırsatı oluştuğunda)
         if (sc.isletimModu === "YARI_OTOMATIK" && alEmirleri.length > 0) {
           const topAl = alEmirleri[0];
           const anahtarAl = `${sc.senaryoId}_AL_EMRI_${topAl.aday.kod}_G${STATE.simulasyonGunu}`;
-          if ((topAl.nakitYeterli || (topAl.aday.getiriIhtimaliPct || 0) >= 80.0) && !STATE.okunanUyarilar[anahtarAl]) {
+          if ((topAl.nakitYeterli || (topAl.aday.getiriIhtimaliPct || 0) >= 84.0) && !STATE.okunanUyarilar[anahtarAl]) {
             STATE.okunanUyarilar[anahtarAl] = true;
             yeniMesajlar.push(topAl.sesMetni);
           }
         }
-
-        // 3. YAKLAŞAN BİLANÇO & TEMETTÜ SESLİ UYARISI (<= 4 Gün)
-        (sc.pozisyonlar || []).forEach(p => {
-          const h = STATE.hisseler.find(x => x.kod === p.kod);
-          if (h && h.takvim) {
-            const anahtarBil = `${sc.senaryoId}_${p.kod}_BILANCO_TAK`;
-            if (h.takvim.bilancoyaKalanGun <= 4 && !STATE.okunanUyarilar[anahtarBil]) {
-              STATE.okunanUyarilar[anahtarBil] = true;
-              yeniMesajlar.push(`Takvim uyarısı: Portföyünüzdeki ${h.ad} hissesinin 3. çeyrek bilançosuna ${h.takvim.bilancoyaKalanGun} gün kaldı.`);
-            }
-          }
-        });
       });
 
       if (yeniMesajlar.length > 0) {
         const birlesik = yeniMesajlar.join(" ");
-        sesliKonus(birlesik, false, tehlikeVar ? "tehlike" : "bilgi");
-        toastGoster("🔊 Sesli AL / SAT Emir Sinyali", birlesik, tehlikeVar ? "error" : "success");
+        zilSesiCal(tehlikeVar ? "sat" : "al");
+        toastGoster("🔔 AL / SAT Emir Sinyali", birlesik, tehlikeVar ? "error" : "success");
       }
     }
 
@@ -4321,8 +4298,8 @@
     // OKUNABİLİRLİK & ARAYÜZ YARDIMCILARI (ODAK SEKMELERİ, BÜYÜK YAZI, SADE TABLO, WHATSAPP)
     // =========================================================================
     function gorunumSekmesiDegistir(sekme, sessiz = false) {
-      const gecerliSekme = ["TUMU", "KOKPIT", "PORTFOY", "SENARYO", "TAKVIM", "TARAYICI"].includes(sekme) ? sekme : "TUMU";
-      ["TUMU", "KOKPIT", "PORTFOY", "SENARYO", "TAKVIM", "TARAYICI"].forEach(k => {
+      const gecerliSekme = ["PORTFOY", "KOKPIT", "SENARYO", "TARAYICI", "TAKVIM", "TUMU"].includes(sekme) ? sekme : "PORTFOY";
+      ["PORTFOY", "KOKPIT", "SENARYO", "TARAYICI"].forEach(k => {
         const btn = document.getElementById(`tabBtn_${k}`);
         if (btn) btn.classList.toggle("active", k === gecerliSekme);
       });
@@ -4331,23 +4308,23 @@
         if (el) el.classList.toggle("sec-hidden", !kosul);
       };
       const tumu = gecerliSekme === "TUMU";
-      goster("sec_MAKRO", tumu || gecerliSekme === "KOKPIT" || gecerliSekme === "SENARYO");
+      goster("sec_PORTFOY_DETAY", tumu || gecerliSekme === "PORTFOY");
       goster("sabahBrifingBanner", tumu || gecerliSekme === "KOKPIT");
       goster("sec_ILK5", tumu || gecerliSekme === "KOKPIT");
-      goster("sec_TAKVIM", tumu || gecerliSekme === "TAKVIM");
-      goster("sec_SENARYO_BASLIK", tumu || gecerliSekme === "SENARYO" || gecerliSekme === "PORTFOY");
-      goster("senaryoKartlariKonteyner", tumu || gecerliSekme === "SENARYO" || gecerliSekme === "PORTFOY");
+      goster("sec_SENARYO_BASLIK", tumu || gecerliSekme === "SENARYO");
+      goster("senaryoKartlariKonteyner", tumu || gecerliSekme === "SENARYO");
       goster("sec_EQUITY", tumu || gecerliSekme === "SENARYO");
-      goster("sec_PORTFOY_DETAY", tumu || gecerliSekme === "PORTFOY" || gecerliSekme === "KOKPIT" || gecerliSekme === "SENARYO");
+      goster("sec_TAKVIM", tumu || gecerliSekme === "SENARYO" || gecerliSekme === "TAKVIM");
+      goster("sec_MAKRO", tumu || gecerliSekme === "SENARYO");
       goster("sec_TARAYICI", tumu || gecerliSekme === "TARAYICI");
 
-      try { localStorage.setItem("bist_hibrit_v46_aktif_sekme", gecerliSekme); } catch (_) {}
+      try { localStorage.setItem("bist_hibrit_v48_aktif_sekme", gecerliSekme); } catch (_) {}
     }
 
     function buyukYaziToggle() {
       const yeniDurum = document.body.classList.toggle("buyuk-yazi");
       const btn = document.getElementById("buyukYaziBtn");
-      if (btn) btn.textContent = yeniDurum ? "🔠 Normal Yazı (A-)" : "🔠 Büyük Yazı (A+)";
+      if (btn) btn.textContent = yeniDurum ? "🔠 A-" : "🔠 A+";
       try { localStorage.setItem("bist_hibrit_v46_buyuk_yazi", yeniDurum ? "1" : "0"); } catch (_) {}
       toastGoster(yeniDurum ? "🔠 Büyük Yazı Modu Aktif" : "Normal Yazı Boyutu", yeniDurum ? "Tablo ve kart yazıları %20 daha rahat okunacak şekilde büyütüldü." : "Standart yazı boyutuna dönüldü.", "info");
     }
@@ -4355,7 +4332,7 @@
     function sadeTabloToggle() {
       const sadeMi = document.body.classList.toggle("sade-tablo");
       const btn = document.getElementById("sadeTabloBtn");
-      if (btn) btn.textContent = sadeMi ? "👁️ Tablo: Sade Görünüm (8 Sütun)" : "👁️ Tablo: Uzman Görünüm (14 Sütun)";
+      if (btn) btn.textContent = sadeMi ? "👁️ Sade (8 Sütun)" : "👁️ Uzman (14 Sütun)";
       try { localStorage.setItem("bist_hibrit_v46_sade_tablo", sadeMi ? "1" : "0"); } catch (_) {}
       toastGoster(sadeMi ? "👁️ Sade Tablo Görünümü (8 Ana Sütun)" : "👁️ Uzman Tablo Görünümü (14 Tam Sütun)", sadeMi ? "İleri düzey çarpan sütunları gizlendi; Kod, XKTUM, Fiyat, Adil Değer, Potansiyel, ROE, Skor ve İşlem sütunları odaklandı." : "Tüm 14 finansal ve teknik sütun aktif edildi.", "info");
     }
@@ -4438,7 +4415,7 @@
       const sc = STATE.senaryolar[STATE.aktifSenaryoId];
       const r = gunIciSermayeliLotRecetesiHesapla(sc);
       const lotStr = r.tamSermayeSepetRecetesi.map(x => `• ${x.lot} Lot ${x.kod} @ ${x.fiyat.toFixed(2)}₺ (Stop: ${x.stopFiyat}₺ / Hedef: ${x.hedefFiyat}₺)`).join("\n");
-      const mesaj = `📊 *BIST Hibrit v4.5 Günlük AL/SAT & Lot Reçetesi (${b.bugun})*\n\n💰 *Sermaye Sınırı (${Math.round(r.sermayeTavani)}₺) Gün İçi Lot Reçetesi:*\n${lotStr}\n\n🗣️ *Özet:* ${b.sesliMetin}`;
+      const mesaj = `📊 *BIST Hibrit v4.8 Günlük AL/SAT & Lot Reçetesi (${b.bugun})*\n\n💰 *Sermaye Sınırı (${Math.round(r.sermayeTavani)}₺) Gün İçi Lot Reçetesi:*\n${lotStr}\n\n🗣️ *Özet:* ${b.sesliMetin}`;
       const url = `https://wa.me/?text=${encodeURIComponent(mesaj)}`;
       window.open(url, "_blank", "noopener,noreferrer");
     }
@@ -4598,41 +4575,103 @@
       { kod: "OTKAR", ad: "Otokar", altSektor: "OTOMOTIV", katilimUyum: "UYGUN_DEGIL", katilimKaynak: "Faizli Borç/Varlık > %33", faizliBorcVarlikOrani: 37.4, faizliNakitVarlikOrani: 11.2, mahzurluGelirOrani: 1.80, payBasiYillikMahzurluTL: 4.39, bazFiyat: 303.00, low52: 270.78, high52: 425.02, fk: 12.40, pddd: 2.95, fdFavok: 8.40, roe: 32.8, roic: 23.5, netBorcFavok: 2.10, fcfVerimi: 4.2, piotroski: 6, beta: 1.04, ema20: 298.89, ema50: 309.86, rsi14: 43.5, rsiSma9: 39.8, atr14: 8.77, hacimOrani: 1.19, mom12_1: 6.4, temettuVerimi: 2.2 },
       { kod: "MPARK", ad: "MLP Sağlık (Medical Park)", altSektor: "GIDA_PERAKENDE", katilimUyum: "UYGUN", katilimKaynak: "BIST XKTUM 2026/09 Duyurusu", faizliBorcVarlikOrani: 19.8, faizliNakitVarlikOrani: 11.5, mahzurluGelirOrani: 0.90, payBasiYillikMahzurluTL: 2.18, bazFiyat: 389.00, low52: 326.40, high52: 463.89, fk: 8.20, pddd: 2.65, fdFavok: 5.80, roe: 43.5, roic: 34.2, netBorcFavok: 0.90, fcfVerimi: 7.6, piotroski: 8, beta: 0.84, ema20: 382.29, ema50: 390.12, rsi14: 47.2, rsiSma9: 42.5, atr14: 9.95, hacimOrani: 1.31, mom12_1: 24.6, temettuVerimi: 3.1 },
       { kod: "TABGD", ad: "TAB Gıda", altSektor: "GIDA_PERAKENDE", katilimUyum: "UYGUN", katilimKaynak: "BIST XKTUM 2026/09 Duyurusu", faizliBorcVarlikOrani: 14.2, faizliNakitVarlikOrani: 21.4, mahzurluGelirOrani: 1.85, payBasiYillikMahzurluTL: 1.70, bazFiyat: 189.60, low52: 162.86, high52: 257.66, fk: 7.80, pddd: 2.15, fdFavok: 5.20, roe: 39.4, roic: 32.1, netBorcFavok: -0.35, fcfVerimi: 8.2, piotroski: 8, beta: 0.89, ema20: 186.56, ema50: 192.03, rsi14: 45.8, rsiSma9: 41.4, atr14: 5.10, hacimOrani: 1.28, mom12_1: 14.8, temettuVerimi: 3.5 },
-      { kod: "TAVHL", ad: "TAV Havalimanları", altSektor: "ULASTIRMA_LOJISTIK", katilimUyum: "UYGUN_DEGIL", katilimKaynak: "Faizli Havalimanı Proje Kredisi > %33", faizliBorcVarlikOrani: 44.2, faizliNakitVarlikOrani: 16.8, mahzurluGelirOrani: 4.20, payBasiYillikMahzurluTL: 5.10, bazFiyat: 263.25, low52: 217.61, high52: 316.32, fk: 6.90, pddd: 1.18, fdFavok: 5.60, roe: 28.9, roic: 19.4, netBorcFavok: 2.25, fcfVerimi: 5.4, piotroski: 7, beta: 0.98, ema20: 259.00, ema50: 264.84, rsi14: 46.5, rsiSma9: 42.1, atr14: 6.79, hacimOrani: 1.26, mom12_1: 18.2, temettuVerimi: 2.8 }
+      { kod: "TAVHL", ad: "TAV Havalimanları", altSektor: "ULASTIRMA_LOJISTIK", katilimUyum: "UYGUN_DEGIL", katilimKaynak: "Faizli Havalimanı Proje Kredisi > %33", faizliBorcVarlikOrani: 44.2, faizliNakitVarlikOrani: 16.8, mahzurluGelirOrani: 4.20, payBasiYillikMahzurluTL: 5.10, bazFiyat: 263.25, low52: 217.61, high52: 316.32, fk: 6.90, pddd: 1.18, fdFavok: 5.60, roe: 28.9, roic: 19.4, netBorcFavok: 2.25, fcfVerimi: 5.4, piotroski: 7, beta: 0.98, ema20: 259.00, ema50: 264.84, rsi14: 46.5, rsiSma9: 42.1, atr14: 6.79, hacimOrani: 1.26, mom12_1: 18.2, temettuVerimi: 2.8 },
+      { kod: "KARSN", ad: "Karsan Otomotiv", altSektor: "OTOMOTIV", katilimUyum: "UYGUN", katilimKaynak: "BIST XKTUM 2026/09 Duyurusu", faizliBorcVarlikOrani: 27.4, faizliNakitVarlikOrani: 9.2, mahzurluGelirOrani: 1.45, payBasiYillikMahzurluTL: 0.08, bazFiyat: 6.80, low52: 6.46, high52: 16.90, fk: 8.40, pddd: 0.75, fdFavok: 4.89, roe: 29.5, roic: 22.4, netBorcFavok: 1.65, fcfVerimi: 5.1, piotroski: 7, beta: 1.18, ema20: 6.72, ema50: 7.15, rsi14: 38.5, rsiSma9: 35.2, atr14: 0.26, hacimOrani: 1.28, mom12_1: 8.4, temettuVerimi: 0.0 },
+      { kod: "VESTL", ad: "Vestel Elektronik", altSektor: "TEKNOLOJI_SAVUNMA", katilimUyum: "UYGUN", katilimKaynak: "BIST XKTUM 2026/09 Duyurusu", faizliBorcVarlikOrani: 28.1, faizliNakitVarlikOrani: 8.4, mahzurluGelirOrani: 1.60, payBasiYillikMahzurluTL: 0.42, bazFiyat: 54.20, low52: 48.10, high52: 98.50, fk: 7.80, pddd: 0.68, fdFavok: 4.95, roe: 26.4, roic: 19.8, netBorcFavok: 1.95, fcfVerimi: 4.8, piotroski: 6, beta: 1.14, ema20: 53.40, ema50: 56.10, rsi14: 41.2, rsiSma9: 38.4, atr14: 1.75, hacimOrani: 1.22, mom12_1: 5.2, temettuVerimi: 0.0 },
+      { kod: "PETKM", ad: "Petkim Petrokimya", altSektor: "CAM_KIMYA_MADEN", katilimUyum: "UYGUN_DEGIL", katilimKaynak: "Faizli Borç/Varlık > %33", faizliBorcVarlikOrani: 36.8, faizliNakitVarlikOrani: 14.5, mahzurluGelirOrani: 2.40, payBasiYillikMahzurluTL: 0.35, bazFiyat: 16.92, low52: 15.80, high52: 26.40, fk: 9.20, pddd: 0.72, fdFavok: 6.40, roe: 21.5, roic: 16.2, netBorcFavok: 2.30, fcfVerimi: 3.8, piotroski: 6, beta: 1.09, ema20: 16.70, ema50: 17.40, rsi14: 42.0, rsiSma9: 39.5, atr14: 0.52, hacimOrani: 1.19, mom12_1: 4.1, temettuVerimi: 0.0 },
+      { kod: "BRSAN", ad: "Borusan Boru Sanayi", altSektor: "DEMIR_CELIK", katilimUyum: "UYGUN", katilimKaynak: "BIST XKTUM 2026/09 Duyurusu", faizliBorcVarlikOrani: 22.4, faizliNakitVarlikOrani: 10.6, mahzurluGelirOrani: 1.15, payBasiYillikMahzurluTL: 2.80, bazFiyat: 368.50, low52: 330.00, high52: 640.00, fk: 9.40, pddd: 1.45, fdFavok: 6.10, roe: 31.2, roic: 24.6, netBorcFavok: 1.20, fcfVerimi: 6.1, piotroski: 7, beta: 1.16, ema20: 362.00, ema50: 378.00, rsi14: 43.6, rsiSma9: 40.1, atr14: 11.20, hacimOrani: 1.25, mom12_1: 9.6, temettuVerimi: 1.2 },
+      { kod: "EGEEN", ad: "Ege Endüstri", altSektor: "OTOMOTIV", katilimUyum: "UYGUN", katilimKaynak: "BIST XKTUM 2026/09 Duyurusu", faizliBorcVarlikOrani: 11.2, faizliNakitVarlikOrani: 19.4, mahzurluGelirOrani: 1.30, payBasiYillikMahzurluTL: 45.00, bazFiyat: 8950.00, low52: 8200.00, high52: 15400.00, fk: 10.20, pddd: 3.10, fdFavok: 6.80, roe: 38.4, roic: 31.0, netBorcFavok: -0.40, fcfVerimi: 6.9, piotroski: 8, beta: 0.94, ema20: 8840.00, ema50: 9120.00, rsi14: 44.5, rsiSma9: 41.0, atr14: 245.00, hacimOrani: 1.24, mom12_1: 11.2, temettuVerimi: 3.2 },
+      { kod: "KCAER", ad: "Kocaer Çelik", altSektor: "DEMIR_CELIK", katilimUyum: "UYGUN", katilimKaynak: "BIST XKTUM 2026/09 Duyurusu", faizliBorcVarlikOrani: 19.6, faizliNakitVarlikOrani: 12.1, mahzurluGelirOrani: 0.95, payBasiYillikMahzurluTL: 0.09, bazFiyat: 12.45, low52: 10.80, high52: 19.60, fk: 8.60, pddd: 1.58, fdFavok: 5.40, roe: 33.8, roic: 26.5, netBorcFavok: 0.95, fcfVerimi: 6.5, piotroski: 7, beta: 1.06, ema20: 12.20, ema50: 12.75, rsi14: 45.2, rsiSma9: 41.8, atr14: 0.38, hacimOrani: 1.29, mom12_1: 13.4, temettuVerimi: 2.1 },
+      { kod: "HEKTS", ad: "Hektaş Ticaret", altSektor: "CAM_KIMYA_MADEN", katilimUyum: "UYGUN", katilimKaynak: "BIST XKTUM 2026/09 Duyurusu", faizliBorcVarlikOrani: 29.4, faizliNakitVarlikOrani: 7.8, mahzurluGelirOrani: 1.20, payBasiYillikMahzurluTL: 0.03, bazFiyat: 3.24, low52: 2.98, high52: 7.85, fk: 14.80, pddd: 1.92, fdFavok: 9.10, roe: 18.5, roic: 14.2, netBorcFavok: 2.45, fcfVerimi: 2.1, piotroski: 5, beta: 1.22, ema20: 3.20, ema50: 3.45, rsi14: 40.8, rsiSma9: 38.2, atr14: 0.11, hacimOrani: 1.18, mom12_1: -4.5, temettuVerimi: 0.0 },
+      { kod: "TKFEN", ad: "Tekfen Holding", altSektor: "CAM_KIMYA_MADEN", katilimUyum: "UYGUN", katilimKaynak: "BIST XKTUM 2026/09 Duyurusu", faizliBorcVarlikOrani: 18.5, faizliNakitVarlikOrani: 16.2, mahzurluGelirOrani: 1.55, payBasiYillikMahzurluTL: 0.62, bazFiyat: 68.40, low52: 52.10, high52: 96.80, fk: 7.90, pddd: 1.14, fdFavok: 5.20, roe: 29.8, roic: 23.4, netBorcFavok: 0.60, fcfVerimi: 6.4, piotroski: 7, beta: 1.02, ema20: 67.10, ema50: 69.50, rsi14: 46.0, rsiSma9: 42.3, atr14: 2.05, hacimOrani: 1.26, mom12_1: 15.2, temettuVerimi: 2.6 }
     ];
 
-    async function genisBistHavuzunuYukle() {
-      try {
-        const res = await fetch("/api/genis-evren-yukle");
-        if (res.ok) {
-          const data = await res.json();
-          if (data.payload) {
-            STATE.sektorMedyanlari = data.payload.sektorMedyanlari;
-            STATE.hisseler = data.payload.hisseler;
-            ekraniCiz();
-            toastGoster("Geniş BIST 100 / XKTUM Paketi Yüklendi", `Evren ${STATE.hisseler.length} hisseye genişletildi ve sektör medyanları güncellendi.`, "success");
-            return;
-          }
-        }
-      } catch (_) {}
+    // Bilinen XKTUM Katılım Endeksi Üyeleri (BIST Katılım Tüm)
+    const BILINEN_XKTUM_SET = new Set([
+      "EREGL", "ISDMR", "TTRAK", "DOAS", "TUPRS", "CWENE", "ASTOR", "BIMAS", "SOKM", "MAVI",
+      "ASELS", "LOGO", "ARDYZ", "RYSAS", "CLEBI", "GUBRF", "ULKER", "CCOLA", "CIMSA", "OYAKC",
+      "TCELL", "KONTR", "MIATK", "GESAN", "YEOTK", "MPARK", "TABGD", "EUPWR", "SMRTG", "ALBRK",
+      "AKSA", "ALKIM", "BERA", "BINHO", "BRSAN", "CANTE", "CEMTS", "CIMSA", "DOFER", "EGEEN",
+      "ENJSA", "ERCB", "GENIL", "GOODY", "GUBRF", "HEKTS", "JANTS", "KARSN", "KAYSE", "KCAER",
+      "KMPUR", "KONYA", "KOPOL", "KOZAA", "LMKDC", "MAGEN", "OBAMS", "ODAS", "OFSYM", "ORGE",
+      "PENTA", "PETKM", "QUAGR", "REEDR", "SARKY", "SDTTR", "SELEC", "SUWEN", "TKFEN", "TMSN",
+      "TUKAS", "VESBE", "VESTL", "YUNSA", "ZOREN"
+    ]);
 
-      const mevcutKodlar = new Set(STATE.hisseler.map(x => x.kod));
-      const eklenecekler = GENIS_BIST_EK_HAVUZU_JS.filter(x => !mevcutKodlar.has(x.kod));
-      if (!eklenecekler.length) {
-        toastGoster("Zaten Yüklü", `Geniş BIST 100 paketi (${STATE.hisseler.length} hisse) zaten aktif.`, "info");
-        return;
-      }
-      const { sektorMed, islenmis } = istemciEvreniHesapla([...STATE.hisseler, ...eklenecekler]);
-      STATE.sektorMedyanlari = sektorMed;
-      STATE.hisseler = islenmis;
-      ekraniCiz();
-      toastGoster("Geniş BIST 100 / XKTUM Paketi Yüklendi", `+${eklenecekler.length} hisse eklendi. Toplam evren: ${STATE.hisseler.length} hisse.`, "success");
+    function tvSektorEslestir(tvSec) {
+      const s = String(tvSec || "").toLowerCase();
+      if (s.includes("metal") || s.includes("steel") || s.includes("construction")) return "DEMIR_CELIK";
+      if (s.includes("auto") || s.includes("motor") || s.includes("consumer durables")) return "OTOMOTIV";
+      if (s.includes("utilities") || s.includes("energy")) return "ENERJI_RAFINERI";
+      if (s.includes("retail") || s.includes("food") || s.includes("consumer non-durables") || s.includes("health")) return "GIDA_PERAKENDE";
+      if (s.includes("technology") || s.includes("communications") || s.includes("electronic")) return "TEKNOLOJI_SAVUNMA";
+      if (s.includes("transportation") || s.includes("logistics")) return "ULASTIRMA_LOJISTIK";
+      return "CAM_KIMYA_MADEN";
     }
 
-    // 🚀 BIST 100 / Tüm BIST Canlı Tarayıcı Genişletme (TradingView Türkiye Scanner API ile 100+ Canlı Hisse)
-    async function tumBist100CanliYukle() {
+    function tvSatirindanHisseNesnesiUret(d) {
+      const kod = String(d[0] || "").trim().toUpperCase();
+      const ad = String(d[1] || kod).trim();
+      const tvSek = d[2];
+      const fiyat = Number(d[3]);
+      if (!kod || !Number.isFinite(fiyat) || fiyat <= 0) return null;
+      const degPct = Number.isFinite(Number(d[4])) ? Number(Number(d[4]).toFixed(2)) : 0;
+      const low52 = Number.isFinite(Number(d[5])) && Number(d[5]) > 0 ? Number(Number(d[5]).toFixed(2)) : Number((fiyat * 0.78).toFixed(2));
+      const high52 = Number.isFinite(Number(d[6])) && Number(d[6]) > 0 ? Number(Number(d[6]).toFixed(2)) : Number((fiyat * 1.28).toFixed(2));
+      const ema20 = Number.isFinite(Number(d[7])) && Number(d[7]) > 0 ? Number(Number(d[7]).toFixed(2)) : Number((fiyat * 0.98).toFixed(2));
+      const ema50 = Number.isFinite(Number(d[8])) && Number(d[8]) > 0 ? Number(Number(d[8]).toFixed(2)) : Number((fiyat * 1.01).toFixed(2));
+      const rsi14 = Number.isFinite(Number(d[9])) && Number(d[9]) > 0 ? Number(Number(d[9]).toFixed(1)) : 48.0;
+      const atr14 = Number.isFinite(Number(d[10])) && Number(d[10]) > 0 ? Number(Number(d[10]).toFixed(2)) : Number((fiyat * 0.028).toFixed(2));
+      const fk = Number.isFinite(Number(d[11])) && Number(d[11]) !== 0 ? Number(Number(d[11]).toFixed(2)) : 9.5;
+      const pddd = Number.isFinite(Number(d[12])) && Number(d[12]) > 0 ? Number(Number(d[12]).toFixed(2)) : 1.75;
+      const fdFavok = Number.isFinite(Number(d[13])) && Number(d[13]) > 0 ? Number(Number(d[13]).toFixed(2)) : 6.4;
+      const roe = Number.isFinite(Number(d[14])) ? Number(Number(d[14]).toFixed(1)) : 28.0;
+      const temVerim = Number.isFinite(Number(d[15])) && Number(d[15]) >= 0 ? Number(Number(d[15]).toFixed(2)) : 0.0;
+      const xktumMi = BILINEN_XKTUM_SET.has(kod);
+      return {
+        kod,
+        ad,
+        altSektor: tvSektorEslestir(tvSek),
+        katilimUyum: xktumMi ? "UYGUN" : "DOGRULANAMADI",
+        katilimKaynak: xktumMi ? "BIST XKTUM Katılım Endeksi Listesi" : null,
+        faizliBorcVarlikOrani: xktumMi ? 19.5 : null,
+        faizliNakitVarlikOrani: xktumMi ? 11.0 : null,
+        mahzurluGelirOrani: xktumMi ? 1.2 : null,
+        payBasiYillikMahzurluTL: xktumMi ? Number((fiyat * 0.008).toFixed(2)) : 0.0,
+        bazFiyat: Number(fiyat.toFixed(2)),
+        gunlukDegisimPct: degPct,
+        low52: Math.min(low52, fiyat),
+        high52: Math.max(high52, fiyat),
+        fk,
+        pddd,
+        fdFavok,
+        roe,
+        roic: Number((roe * 0.78).toFixed(1)),
+        netBorcFavok: 1.25,
+        fcfVerimi: 5.2,
+        piotroski: roe > 25 ? 7 : 6,
+        beta: 1.0,
+        ema20,
+        ema50,
+        rsi14,
+        rsiSma9: Number(Math.max(15, rsi14 - 2.5).toFixed(1)),
+        atr14,
+        hacimOrani: 1.24,
+        mom12_1: degPct * 3.0,
+        temettuVerimi: temVerim
+      };
+    }
+
+    async function genisBistHavuzunuYukle() {
+      return tumBist100CanliYukle(false);
+    }
+
+    // 🚀 BIST 100 / Tüm BIST Canlı Tarayıcı Genişletme (TradingView Türkiye Scanner API ile 200+ Canlı Hisse)
+    async function tumBist100CanliYukle(sessiz = false) {
       try {
-        toastGoster("📡 BIST 100 Canlı Taranıyor...", "TradingView Türkiye sunucusundan en yüksek hacimli ve piyasa değerli 100+ BIST hissesi çekiliyor...", "info");
+        if (!sessiz) {
+          toastGoster("📡 Tüm BIST Canlı Taranıyor...", "TradingView Türkiye sunucusundan 200+ BIST şirketi canlı fiyatlarıyla çekiliyor...", "info");
+        }
         const res = await fetch("https://scanner.tradingview.com/turkey/scan", {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=UTF-8" },
@@ -4651,36 +4690,13 @@
               "enterprise_value_ebitda_ttm", "return_on_equity", "dividends_yield_current"
             ],
             sort: { sortBy: "market_cap_basic", sortOrder: "desc" },
-            range: [0, 110]
+            range: [0, 220]
           })
         });
         if (!res.ok) throw new Error("TradingView BIST tarayıcısına ulaşılamadı.");
         const json = await res.json();
         const rows = Array.isArray(json?.data) ? json.data : [];
         if (!rows.length) throw new Error("Canlı hisse listesi boş döndü.");
-
-        const sektorEslestir = (tvSec) => {
-          const s = String(tvSec || "").toLowerCase();
-          if (s.includes("metal") || s.includes("steel") || s.includes("construction")) return "DEMIR_CELIK";
-          if (s.includes("auto") || s.includes("motor") || s.includes("consumer durables")) return "OTOMOTIV";
-          if (s.includes("utilities") || s.includes("energy")) return "ENERJI_RAFINERI";
-          if (s.includes("retail") || s.includes("food") || s.includes("consumer non-durables") || s.includes("health")) return "GIDA_PERAKENDE";
-          if (s.includes("technology") || s.includes("communications") || s.includes("electronic")) return "TEKNOLOJI_SAVUNMA";
-          if (s.includes("transportation") || s.includes("logistics")) return "ULASTIRMA_LOJISTIK";
-          return "CAM_KIMYA_MADEN";
-        };
-
-        // Bilinen XKTUM Katılım Endeksi Üyeleri (BIST Katılım Tüm)
-        const bilinenXktumSet = new Set([
-          "EREGL", "ISDMR", "TTRAK", "DOAS", "TUPRS", "CWENE", "ASTOR", "BIMAS", "SOKM", "MAVI",
-          "ASELS", "LOGO", "ARDYZ", "RYSAS", "CLEBI", "GUBRF", "ULKER", "CCOLA", "CIMSA", "OYAKC",
-          "TCELL", "KONTR", "MIATK", "GESAN", "YEOTK", "MPARK", "TABGD", "EUPWR", "SMRTG", "ALBRK",
-          "AKSA", "ALKIM", "BERA", "BINHO", "BRSAN", "CANTE", "CEMTS", "CIMSA", "DOFER", "EGEEN",
-          "ENJSA", "ERCB", "GENIL", "GOODY", "GUBRF", "HEKTS", "JANTS", "KARSN", "KAYSE", "KCAER",
-          "KMPUR", "KONYA", "KOPOL", "KOZAA", "LMKDC", "MAGEN", "OBAMS", "ODAS", "OFSYM", "ORGE",
-          "PENTA", "PETKM", "QUAGR", "REEDR", "SARKY", "SDTTR", "SELEC", "SUWEN", "TKFEN", "TMSN",
-          "TUKAS", "VESBE", "VESTL", "YUNSA", "ZOREN"
-        ]);
 
         const mevcutMap = {};
         STATE.hisseler.forEach(h => { mevcutMap[h.kod] = h; });
@@ -4689,72 +4705,25 @@
         rows.forEach(r => {
           const d = r.d || [];
           const kod = String(d[0] || "").trim().toUpperCase();
-          const ad = String(d[1] || kod).trim();
           const tvSek = d[2];
-          const fiyat = Number(d[3]);
-          if (!kod || !Number.isFinite(fiyat) || fiyat <= 0) return;
-
-          // Banka ve geleneksel finans/sigorta/faktöring hisselerini katılım & sanayi modelinden ayır
+          if (!kod) return;
           if (String(tvSek || "").toLowerCase().includes("finance") && !kod.includes("ALBRK") && !kod.includes("KTLEV")) {
             return;
           }
-
-          const degPct = Number.isFinite(Number(d[4])) ? Number(Number(d[4]).toFixed(2)) : 0;
-          const low52 = Number.isFinite(Number(d[5])) && Number(d[5]) > 0 ? Number(Number(d[5]).toFixed(2)) : Number((fiyat * 0.78).toFixed(2));
-          const high52 = Number.isFinite(Number(d[6])) && Number(d[6]) > 0 ? Number(Number(d[6]).toFixed(2)) : Number((fiyat * 1.28).toFixed(2));
-          const ema20 = Number.isFinite(Number(d[7])) && Number(d[7]) > 0 ? Number(Number(d[7]).toFixed(2)) : Number((fiyat * 0.98).toFixed(2));
-          const ema50 = Number.isFinite(Number(d[8])) && Number(d[8]) > 0 ? Number(Number(d[8]).toFixed(2)) : Number((fiyat * 1.01).toFixed(2));
-          const rsi14 = Number.isFinite(Number(d[9])) && Number(d[9]) > 0 ? Number(Number(d[9]).toFixed(1)) : 48.0;
-          const atr14 = Number.isFinite(Number(d[10])) && Number(d[10]) > 0 ? Number(Number(d[10]).toFixed(2)) : Number((fiyat * 0.028).toFixed(2));
-          const fk = Number.isFinite(Number(d[11])) && Number(d[11]) !== 0 ? Number(Number(d[11]).toFixed(2)) : 9.5;
-          const pddd = Number.isFinite(Number(d[12])) && Number(d[12]) > 0 ? Number(Number(d[12]).toFixed(2)) : 1.75;
-          const fdFavok = Number.isFinite(Number(d[13])) && Number(d[13]) > 0 ? Number(Number(d[13]).toFixed(2)) : 6.4;
-          const roe = Number.isFinite(Number(d[14])) ? Number(Number(d[14]).toFixed(1)) : 28.0;
-          const temVerim = Number.isFinite(Number(d[15])) && Number(d[15]) >= 0 ? Number(Number(d[15]).toFixed(2)) : 0.0;
+          const yeniNesne = tvSatirindanHisseNesnesiUret(d);
+          if (!yeniNesne) return;
 
           if (mevcutMap[kod]) {
-            mevcutMap[kod].bazFiyat = Number(fiyat.toFixed(2));
-            mevcutMap[kod].gunlukDegisimPct = degPct;
-            mevcutMap[kod].low52 = Math.min(low52, fiyat);
-            mevcutMap[kod].high52 = Math.max(high52, fiyat);
-            mevcutMap[kod].ema20 = ema20;
-            mevcutMap[kod].ema50 = ema50;
-            mevcutMap[kod].rsi14 = rsi14;
-            mevcutMap[kod].atr14 = atr14;
+            mevcutMap[kod].bazFiyat = yeniNesne.bazFiyat;
+            mevcutMap[kod].gunlukDegisimPct = yeniNesne.gunlukDegisimPct;
+            mevcutMap[kod].low52 = Math.min(mevcutMap[kod].low52, yeniNesne.bazFiyat);
+            mevcutMap[kod].high52 = Math.max(mevcutMap[kod].high52, yeniNesne.bazFiyat);
+            mevcutMap[kod].ema20 = yeniNesne.ema20;
+            mevcutMap[kod].ema50 = yeniNesne.ema50;
+            mevcutMap[kod].rsi14 = yeniNesne.rsi14;
+            mevcutMap[kod].atr14 = yeniNesne.atr14;
           } else {
-            const xktumMi = bilinenXktumSet.has(kod);
-            mevcutMap[kod] = {
-              kod,
-              ad,
-              altSektor: sektorEslestir(tvSek),
-              katilimUyum: xktumMi ? "UYGUN" : "DOGRULANAMADI",
-              katilimKaynak: xktumMi ? "BIST XKTUM Katılım Endeksi Listesi" : null,
-              faizliBorcVarlikOrani: xktumMi ? 19.5 : null,
-              faizliNakitVarlikOrani: xktumMi ? 11.0 : null,
-              mahzurluGelirOrani: xktumMi ? 1.2 : null,
-              payBasiYillikMahzurluTL: xktumMi ? Number((fiyat * 0.008).toFixed(2)) : 0.0,
-              bazFiyat: Number(fiyat.toFixed(2)),
-              gunlukDegisimPct: degPct,
-              low52: Math.min(low52, fiyat),
-              high52: Math.max(high52, fiyat),
-              fk,
-              pddd,
-              fdFavok,
-              roe,
-              roic: Number((roe * 0.78).toFixed(1)),
-              netBorcFavok: 1.25,
-              fcfVerimi: 5.2,
-              piotroski: roe > 25 ? 7 : 6,
-              beta: 1.0,
-              ema20,
-              ema50,
-              rsi14,
-              rsiSma9: Number(Math.max(15, rsi14 - 2.5).toFixed(1)),
-              atr14,
-              hacimOrani: 1.24,
-              mom12_1: degPct * 3.0,
-              temettuVerimi: temVerim
-            };
+            mevcutMap[kod] = yeniNesne;
             yeniEklenen++;
           }
         });
@@ -4765,45 +4734,100 @@
         STATE.hisseler = islenmis;
         canliFiyatlariSenaryolaraSenkronizeEt();
         ekraniCiz();
-        toastGoster("🚀 BIST 100 Canlı Evren Yüklendi!", `+${yeniEklenen} yeni BIST şirketi canlı verileriyle eklendi. Toplam taranan evren: ${STATE.hisseler.length} Hisse!`, "success");
+        if (!sessiz) {
+          toastGoster("🚀 BIST Canlı Evren Yüklendi!", `+${yeniEklenen} yeni BIST şirketi canlı verileriyle eklendi. Toplam evren: ${STATE.hisseler.length} Hisse!`, "success");
+        }
       } catch (err) {
-        toastGoster("Canlı Tarama Uyarısı", err.message || "TradingView bağlantısı kurulamadı.", "warning");
+        if (!sessiz) {
+          toastGoster("Canlı Tarama Uyarısı", err.message || "TradingView bağlantısı kurulamadı.", "warning");
+        }
       }
     }
 
-    async function otomatikBistKoduCek() {
-      const inp = document.getElementById("hizliBistKodInput");
-      const kod = (inp ? inp.value : "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+    let _canliAramaTimer = null;
+    function hizliAramaVeCanliBul(deger) {
+      tarayiciTablosunuCiz();
+      const aranan = String(deger || "").trim().toUpperCase();
+      if (aranan.length < 3) return;
+      const eslesenVarMi = STATE.hisseler.some(h => h.kod.includes(aranan) || h.ad.toUpperCase().includes(aranan));
+      if (!eslesenVarMi) {
+        clearTimeout(_canliAramaTimer);
+        _canliAramaTimer = setTimeout(() => {
+          otomatikBistKoduCek(aranan, true);
+        }, 450);
+      }
+    }
+
+    async function otomatikBistKoduCek(arananParam = null, sessizArama = false) {
+      const inp = document.getElementById("aramaInput") || document.getElementById("hizliBistKodInput");
+      const ham = (arananParam !== null ? arananParam : (inp ? inp.value : "")).trim().toUpperCase();
+      const kod = ham.replace(/[^A-Z0-9]/g, "");
       if (!kod) {
-        toastGoster("Hisse Kodu Girin", "Lütfen çekmek istediğiniz BIST kodunu yazın (Örn: ULKER, TCELL, BRSAN).", "warning");
+        if (!sessizArama) toastGoster("Hisse Kodu veya Adı Yazın", "Lütfen aramak istediğiniz BIST kodunu yazın (Örn: KARSN, ULKER, TCELL, BRSAN).", "warning");
         return;
       }
+
+      // 1. Zaten bellekte varsa doğrudan tabloda filtrele ve göster
+      const mevcut = STATE.hisseler.find(x => x.kod === kod || x.ad.toUpperCase().includes(ham));
+      if (mevcut) {
+        if (inp) inp.value = mevcut.kod;
+        gorunumSekmesiDegistir("TARAYICI", true);
+        tarayiciTablosunuCiz();
+        if (!sessizArama) toastGoster(`✅ ${mevcut.kod} Bulundu`, `${mevcut.ad} (${mevcut.bazFiyat.toFixed(2)} ₺) tabloda listelendi.`, "success");
+        return;
+      }
+
+      // 2. Doğrudan tarayıcıdan TradingView Türkiye BIST API ile canlı çek (Sunucu gerektirmez!)
       try {
-        const res = await fetch(`/api/canli-hisse-ekle?kod=${encodeURIComponent(kod)}`);
-        const data = await res.json();
-        if (data.ok && data.payload) {
-          STATE.sektorMedyanlari = data.payload.sektorMedyanlari;
-          STATE.hisseler = data.payload.hisseler;
-          if (inp) inp.value = "";
-          ekraniCiz();
-          toastGoster("Otomatik BIST Hissesi Çekildi", data.mesaj, "success");
-          return;
+        const res = await fetch("https://scanner.tradingview.com/turkey/scan", {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=UTF-8" },
+          body: JSON.stringify({
+            filter: [{ left: "exchange", operation: "equal", right: "BIST" }],
+            options: { lang: "tr" },
+            markets: ["turkey"],
+            symbols: { query: { types: [] }, tickers: [`BIST:${kod}`] },
+            columns: [
+              "name", "description", "sector", "close", "change",
+              "price_52_week_low", "price_52_week_high", "EMA20", "EMA50",
+              "RSI", "ATR", "price_earnings_ttm", "price_book_fq",
+              "enterprise_value_ebitda_ttm", "return_on_equity", "dividends_yield_current"
+            ]
+          })
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const row = Array.isArray(json?.data) && json.data.length > 0 ? json.data[0] : null;
+          if (row && Array.isArray(row.d)) {
+            const yeniNesne = tvSatirindanHisseNesnesiUret(row.d);
+            if (yeniNesne) {
+              const { sektorMed, islenmis } = istemciEvreniHesapla([...STATE.hisseler, yeniNesne]);
+              STATE.sektorMedyanlari = sektorMed;
+              STATE.hisseler = islenmis;
+              gorunumSekmesiDegistir("TARAYICI", true);
+              ekraniCiz();
+              toastGoster(`⚡ ${yeniNesne.kod} Canlı Çekildi`, `${yeniNesne.ad} (${yeniNesne.bazFiyat.toFixed(2)} ₺) BIST'ten canlı çekilerek tarayıcıya eklendi!`, "success");
+              return;
+            }
+          }
         }
       } catch (_) {}
 
-      // Çevrimdışı PWA modundaysa geniş havuzda var mı kontrol et
-      const hazir = GENIS_BIST_EK_HAVUZU_JS.find(x => x.kod === kod);
+      // 3. Yerel geniş havuzda varsa ekle
+      const hazir = GENIS_BIST_EK_HAVUZU_JS.find(x => x.kod === kod || x.ad.toUpperCase().includes(ham));
       if (hazir) {
-        if (!STATE.hisseler.some(x => x.kod === kod)) {
+        if (!STATE.hisseler.some(x => x.kod === hazir.kod)) {
           const { sektorMed, islenmis } = istemciEvreniHesapla([...STATE.hisseler, hazir]);
           STATE.sektorMedyanlari = sektorMed;
           STATE.hisseler = islenmis;
-          if (inp) inp.value = "";
           ekraniCiz();
         }
-        toastGoster("Hisse Evrene Eklendi", `${kod} (${hazir.ad}) otomatik olarak tarayıcıya dahil edildi.`, "success");
-      } else {
-        toastGoster("Sunucu Bağlantısı Gerekli", `${kod} hissesini internetten canlı çekmek için BASLAT_PWA.bat ile Python motorunu çalıştırın veya 'Geniş BIST 100 Paketi Yükle' butonunu kullanın.`, "warning");
+        toastGoster("Hisse Evrene Eklendi", `${hazir.kod} (${hazir.ad}) tarayıcıya dahil edildi.`, "success");
+        return;
+      }
+
+      if (!sessizArama) {
+        toastGoster("Hisse Kodu Bulunamadı", `"${kod}" BIST sembol listesinde bulunamadı. Lütfen BIST kodunu kontrol edin (Örn: KARSN, THYAO, ASELS).`, "warning");
       }
     }
 
@@ -4820,31 +4844,61 @@
 
     window.addEventListener("online", () => {
       const el = document.getElementById("agDurumRozet");
-      if (el) { el.textContent = "🟢 Çevrimiçi"; el.className = "badge badge-emerald"; }
+      if (el) { el.textContent = "🟢 Canlı"; el.className = "badge badge-emerald"; }
       toastGoster("Bağlantı Sağlandı", "Çevrimiçi veri akışı aktif.", "success");
     });
     window.addEventListener("offline", () => {
       const el = document.getElementById("agDurumRozet");
-      if (el) { el.textContent = "🟠 Çevrimdışı PWA Modu"; el.className = "badge badge-amber"; }
+      if (el) { el.textContent = "🟠 Çevrimdışı"; el.className = "badge badge-amber"; }
       toastGoster("Çevrimdışı PWA Modu", "Uygulama doğrulanmış yerel snapshot ile kesintisiz çalışıyor.", "warning");
     });
 
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(() => {});
+        navigator.serviceWorker.register("./sw.js?v=48").catch(() => {});
       });
     }
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       STATE.deferredPrompt = e;
-      document.getElementById("pwaInstallBtn").style.display = "inline-flex";
+      const btn = document.getElementById("pwaInstallBtn");
+      if (btn) {
+        btn.style.display = "inline-flex";
+        btn.textContent = "📲 Telefona Yükle (Hazır)";
+      }
     });
     async function pwaYukle() {
-      if (!STATE.deferredPrompt) return;
-      STATE.deferredPrompt.prompt();
-      await STATE.deferredPrompt.userChoice;
-      STATE.deferredPrompt = null;
-      document.getElementById("pwaInstallBtn").style.display = "none";
+      if (STATE.deferredPrompt) {
+        STATE.deferredPrompt.prompt();
+        await STATE.deferredPrompt.userChoice;
+        STATE.deferredPrompt = null;
+        return;
+      }
+      const modal = document.getElementById("pwaKurulumYardimModal");
+      if (modal) modal.classList.add("open");
+    }
+
+    async function pwaHayaletKaydiSifirla() {
+      try {
+        if ("serviceWorker" in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const r of regs) {
+            await r.unregister();
+          }
+        }
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          for (const k of keys) {
+            await caches.delete(k);
+          }
+        }
+        toastGoster("🔄 Kurulum Önbelleği Sıfırlandı", "Sayfa yeni kurulum kimliğiyle yeniden yükleniyor...", "success");
+        setTimeout(() => {
+          window.location.href = "./?app=bist-v48&reset=" + Date.now();
+        }, 700);
+      } catch (_) {
+        window.location.reload();
+      }
     }
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -4853,15 +4907,16 @@
       if (localStorage.getItem("bist_hibrit_v46_buyuk_yazi") === "1") {
         document.body.classList.add("buyuk-yazi");
         const bBtn = document.getElementById("buyukYaziBtn");
-        if (bBtn) bBtn.textContent = "🔠 Normal Yazı (A-)";
+        if (bBtn) bBtn.textContent = "🔠 A-";
       }
-      if (localStorage.getItem("bist_hibrit_v46_sade_tablo") === "1") {
+      // Varsayılan olarak sade tablo aktif olsun ki ekran karmaşık görünmesin
+      if (localStorage.getItem("bist_hibrit_v46_sade_tablo") !== "0") {
         document.body.classList.add("sade-tablo");
         const sBtn = document.getElementById("sadeTabloBtn");
-        if (sBtn) sBtn.textContent = "👁️ Tablo: Sade Görünüm (8 Sütun)";
+        if (sBtn) sBtn.textContent = "👁️ Sade (8 Sütun)";
       }
-      const kayitliSekme = localStorage.getItem("bist_hibrit_v46_aktif_sekme");
-      if (kayitliSekme) gorunumSekmesiDegistir(kayitliSekme, true);
+      const kayitliSekme = localStorage.getItem("bist_hibrit_v48_aktif_sekme") || "PORTFOY";
+      gorunumSekmesiDegistir(kayitliSekme, true);
       verileriYukle(false);
       canliOtoTakipBaslat();
     });

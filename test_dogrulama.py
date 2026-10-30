@@ -105,11 +105,11 @@ def run_all_tests():
         if "alert(" in html_text:
             failures.append("TEST 9b HATA: index.html içinde hala bloklayıcı alert() bulunuyor (Toast kullanılmalı)!")
 
-        # TEST 10 (Quant-TKBB Denetçi Ajanı): Sunucu (BIST_EVRENI + GENIS_BIST_EK_HAVUZU = 42) ile İstemci hisse evreni birebir aynı olmalı!
+        # TEST 10 (Quant-TKBB Denetçi Ajanı): Sunucu (BIST_EVRENI + GENIS_BIST_EK_HAVUZU = 50) ile İstemci hisse evreni birebir aynı olmalı!
         js_codes = re.findall(r'\{\s*kod:\s*"([A-Z0-9]+)"', html_text)
         py_codes = [s["kod"] for s in motor.BIST_EVRENI] + [s["kod"] for s in motor.GENIS_BIST_EK_HAVUZU]
-        if len(py_codes) != 42 or js_codes != py_codes:
-            failures.append(f"TEST 10 HATA: Python ({len(py_codes)}) ve JS ({len(js_codes)}) hisse evreni birebir aynı değil!")
+        if len(py_codes) != 50 or js_codes != py_codes or "KARSN" not in hisseler:
+            failures.append(f"TEST 10 HATA: Python ({len(py_codes)}) ve JS ({len(js_codes)}) hisse evreni birebir aynı değil veya KARSN eksik!")
 
         # TEST 11 (Quant-TKBB Denetçi Ajanı): Bilanço değişmezleri (eps0, bvps0, favokPs0) sayesinde fiyat %20 arttığında Adil Değer sabit kalmalı!
         tuprs_base = dict(hisseler["TUPRS"])

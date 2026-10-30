@@ -1,8 +1,9 @@
 {
-  "name": "BIST Hibrit Analiz & 4 Senaryolu Portföy Terminal v4.0",
-  "short_name": "BIST Hibrit v4",
-  "description": "Kurumsal Çok Faktörlü BIST Değerleme, XKTUM Katılım Denetimi, TKBB 3.6.1 Arındırma ve 4 Paralel Senaryolu Otopilot/Yarı-Otomatik Portföy Simülatörü",
-  "start_url": "./index.html",
+  "id": "/borsa/?app=bist-v48",
+  "name": "BIST Hibrit Al-Sat & Portföy Terminali",
+  "short_name": "BIST Al-Sat",
+  "description": "Borsa İstanbul Canlı BIST 100+ Tarayıcı, Sermaye Sınırlı Al-Sat Reçetesi, XKTUM Katılım ve 4 Senaryolu Portföy Terminali",
+  "start_url": "./?app=bist-v48",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
@@ -12,16 +13,40 @@
   "categories": ["finance", "business", "productivity"],
   "icons": [
     {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "./icon-192.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "./icon-512.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
